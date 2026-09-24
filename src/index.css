@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Montserrat', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* Purposeful architectural palette: Deep charcoal, subtle warm slate, single amber accent */
+    --color-bg: #0a0c10;
+    --color-surface: #12151e;
+    --color-surface-raised: #181d28;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-hover: rgba(255, 255, 255, 0.18);
+    --color-accent: #e5ad68;
+    --color-accent-subtle: rgba(229, 173, 104, 0.12);
+    --color-text-main: #f0f2f8;
+    --color-text-muted: #9aa1b2;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: clip;
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Clean, restrained scrollbar without distracting neon glow */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0c10;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}
+
+/* Hide scrollbar utility for clean horizontal track */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Accessible focus outline (R-32) */
+:focus-visible {
+  outline: 2px solid #e5ad68;
+  outline-offset: 3px;
+}
