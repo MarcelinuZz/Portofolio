@@ -9,18 +9,16 @@ export const projectsData = [
     category: 'Software Development',
     featured: true,
     shortDescription: 'A personal finance application with alarm to support user.',
-    image: '/images/projects/pocketlog.svg',
+    image: '/images/projects/pocketlog.webp',
     technologies: ['Flutter', 'Node.js', 'Express.js', 'MySQL', 'Docker'],
     github: {
-      frontend: 'https://github.com/yourusername/pocketlog-frontend',
-      backend: 'https://github.com/yourusername/pocketlog-backend'
+      frontend: 'http://github.com/Pteraaaa/SoftEng_Kel10',
+      backend: 'https://github.com/MarcelinuZz/PocketLogBackend'
     },
+    source: null, 
+    liveDemo: null,
     overview:
       'PocketLog is a modern personal finance and expense tracking ecosystem engineered around microservices. It handles high-frequency expense logging, automated categorization, and alarm to remind user',
-    problem:
-      'Many budgeting apps are either locked behind predatory subscriptions or built on slow monolithic backends that fail to sync across multiple devices in real time. Users lacked a clean, distraction-free interface to gain actionable insights into their burn rate.',
-    solution:
-      'Designed an event-driven microservices architecture where transactions, user authentication, and analytics operate as independent services containerized with Docker, coupled with a cross-platform Flutter application for smooth 60fps mobile interaction.',
     myContribution:
       'Engineered the full-stack architecture by building the complete backend infrastructure (Express.js/Node.js, MySQL, Docker) and the primary Flutter budgeting interface, ensuring seamless end-to-end integration.',
     keyLearning:
@@ -32,33 +30,64 @@ export const projectsData = [
     category: 'IoT / Hardware',
     featured: true,
     shortDescription:
-      'A smart insole concept designed to provide biomechanical feedback and help reduce running-related injuries.',
-    image: '/images/projects/stepwise.svg',
-    technologies: ['ESP32-C3', 'FSR', 'MPU6050', 'PVDF', 'IoT', 'C++'],
-    github: {
-      frontend: 'https://github.com/yourusername/stepwise-app',
-      backend: 'https://github.com/yourusername/stepwise-firmware'
-    },
+      'A smart insole with hybrid energy harvesting concept to prevent injuries.',
+    image: '/images/projects/stepwise.webp',
+    technologies: ['ESP32-C3', 'FSR', 'MPU6050', 'PVDF', 'IoT'],
+    source: 'https://drive.google.com/file/d/1zno_TM-J13Jd2EDPtDvvfhYWMmT5GrxE/view?usp=sharing', 
     liveDemo: null,
     overview:
-      'STEPWISE is an embedded wearable technology prototype featuring pressure-sensitive smart insoles. It samples foot-strike dynamics, supination/pronation tendencies, and cadence to alert athletes to poor biomechanics before injuries occur.',
-    problem:
-      'Repetitive strain and running injuries (such as plantar fasciitis and stress fractures) stem from undetectable gait asymmetries that standard fitness trackers cannot monitor.',
-    solution:
-      'Integrated an ultra-compact ESP32-C3 micro-controller with an array of Force-Sensing Resistors (FSR), PVDF piezoelectric impact transducers, and a 6-axis MPU6050 inertial measurement unit to capture millisecond-level pressure distributions.',
+      'STEPWISE is a smart insole concept designed to help beginner runners improve theiir running form through personalized gait analysis. The system combines IoT, AI, and hybrid energy harvesting with kinetic and solar energy to provide practical insights while minimizing charging frequency',
     myContribution:
-      'Wrote low-level C++ firmware for analog sensor polling and I2C telemetry, designed digital low-pass filtering routines to remove footstep noise, and developed an initial Bluetooth Low Energy (BLE) packet protocol.',
+      'i designed the IoT system flow and device connectivity. explored suitable sensors and components for the prototype, and turned the idea into a feasible product concept',
     keyLearning:
-      'Low-power microcontroller programming, hardware debugging, sensor calibration techniques, and real-time serial telemetry processing.'
+      'microcontrollers, PCB design, Embedded system, Energy harvestng, Sleep and Burst technique for IoT'
+  },
+  {
+    id: 'cinewave',
+    title: 'CineWave',
+    category: 'Software Development',
+    featured: true,
+    shortDescription: 'An online movie reservation website developed during the IT Division Training program.',
+    image: '/images/projects/CineWave.webp',
+    technologies: ['Express.js', 'React', 'TypeScript', 'SQL Server'],
+    github: {
+      frontend: 'https://github.com/MarcelinuZz/CineWave_FrontEnd',
+      backend: 'https://github.com/MarcelinuZz/CineWave_BackEnd'
+    },
+    source: null, 
+    liveDemo: null,
+    overview:
+      'CineWave is a comprehensive web application for online movie ticket reservations that allows users to browse movies, select seats, and process transaction securely',
+    myContribution:
+      'Implemented a full-stack system featuring semi-stateless authentication (PassportJS & JWT with a refresh token mechanism stored in the database), RESTful CRUD APIs, Midtrans payment integration, React frontend components, and database optimization.',
+    keyLearning:
+      'semi-stateless authentication with jwt, express.js, react, midtrans configuration'
+  },
+  {
+    id: 'BerkatAbadi',
+    title: 'BerkatAbadi',
+    category: 'Software Development',
+    featured: true,
+    shortDescription: 'A photocopier rental website I built for my friend',
+    image: '/images/projects/BerkatAbadi.webp',
+    technologies: ['html', 'css', 'javascript'],
+    source: null,
+    liveDemo: 'https://www.berkatabadi.net/', 
+    overview:
+      'Berkat Abadi is a photocopier rental website I built for a friend using only HTML, CSS, and JavaScript. By keeping the project frontend-only and avoiding a backend, we were able to minimize production costs and deploy the website using Vercel with only a domain as an additional expense.',
+    myContribution:
+      'Collaborated with my partner to design and refine the UI, Conducted direct consultation with client to gather feedback for the ui, improving website performance and SEO',
+    keyLearning:
+      'Hosting Website, Website Performance, SEO'
   },
   {
     id: 'ai-health-assistant',
-    title: 'AI Health Assistant',
+    title: 'PastiBisa',
     category: 'Artificial Intelligence',
     featured: true,
     shortDescription:
-      'An AI-based project exploring disease prediction from user symptoms and recommending an appropriate type of healthcare facility.',
-    image: '/images/projects/ai-health.svg',
+      'An AI-based project for disease prediction from user symptoms and recommending an appropriate type of healthcare facility.',
+    image: '/images/projects/pastibisa.webp',
     technologies: [
       'Python',
       'Scikit-learn',
@@ -67,21 +96,14 @@ export const projectsData = [
       'Pandas',
       'FastAPI'
     ],
-    github: {
-      frontend: 'https://github.com/yourusername/ai-health-frontend',
-      backend: 'https://github.com/yourusername/ai-health-backend'
-    },
-    liveDemo: 'https://ai-health-assistant.demo.app',
+    source: ['https://colab.research.google.com/drive/1R6fvfXzTLlC-UGelhbR864e-POOe9SJ-?usp=sharing', 'https://github.com/MarcelinuZz/AOL_AI'], 
+    liveDemo: null,
     overview:
       'An intelligent clinical symptom triage engine that evaluates user-reported symptoms using machine learning classifiers and directs individuals to the appropriate tier of care (teleconsultation, general practitioner, or urgent emergency care).',
-    problem:
-      'Patients experiencing unfamiliar symptoms often face severe anxiety and either delay necessary clinical visits or overcrowd emergency rooms for mild self-limiting conditions.',
-    solution:
-      'Trained an ensemble Random Forest classifier on multidimensional symptom-disease matrices, combining probability outputs with medical urgency scoring algorithms and a lightweight REST API for instant evaluation.',
     myContribution:
       'Conducted data preprocessing, one-hot vectorization, hyperparameter tuning using Scikit-learn, and implemented a RESTful model serving API using FastAPI with JSON validation.',
     keyLearning:
-      'Supervised classification metrics (precision vs. recall in healthcare scenarios), feature importance interpretation, and deploying machine learning inference endpoints.'
+      'Supervised classification metrics, feature importance interpretation, and deploying machine learning inference endpoints.'
   }
 ];
 
@@ -120,7 +142,43 @@ export function getProjectGithubLinks(project) {
   if (flatLinks.length > 0) return flatLinks;
 
   if (typeof project.github === 'string' && project.github.trim()) {
-    return [{ label: 'Source', url: project.github }];
+    return [{ label: 'GitHub', url: project.github }];
+  }
+
+  return [];
+}
+
+/**
+ * Normalizes non-GitHub source code links (e.g. Google Drive, GitLab, zip archives, etc.)
+ * Supports:
+ * - Single string: project.source: 'url' or project.otherSource: 'url'
+ * - Array: project.source: ['url1', 'url2']
+ * - Object: project.source: { label: 'url' }
+ */
+export function getProjectOtherSourceLinks(project) {
+  if (!project) return [];
+
+  const sourceVal = project.source || project.otherSource;
+  if (!sourceVal) return [];
+
+  if (typeof sourceVal === 'string' && sourceVal.trim()) {
+    return [{ label: 'Source', url: sourceVal }];
+  }
+
+  if (Array.isArray(sourceVal)) {
+    return sourceVal.map((url, i) => ({
+      label: i === 0 ? 'Source' : `Source ${i + 1}`,
+      url
+    }));
+  }
+
+  if (typeof sourceVal === 'object') {
+    return Object.entries(sourceVal)
+      .filter(([, val]) => typeof val === 'string' && val.trim())
+      .map(([key, val]) => ({
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        url: val
+      }));
   }
 
   return [];

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink } from 'lucide-react';
+import { X, ExternalLink, Code2 } from 'lucide-react';
 import { GithubIcon } from './Icons';
-import { getProjectGithubLinks } from '../data/projects';
+import { getProjectGithubLinks, getProjectOtherSourceLinks } from '../data/projects';
 
 export default function ProjectModal({ project, onClose }) {
   // ESC key listener to close modal (R-32)
@@ -23,6 +23,7 @@ export default function ProjectModal({ project, onClose }) {
   if (!project) return null;
 
   const githubLinks = getProjectGithubLinks(project);
+  const otherSourceLinks = getProjectOtherSourceLinks(project);
 
   return (
     <AnimatePresence>
@@ -151,7 +152,20 @@ export default function ProjectModal({ project, onClose }) {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
                 >
                   <GithubIcon className="w-4 h-4" />
-                  <span>{link.label === 'Source' ? 'View Repository' : `${link.label} Repo`}</span>
+                  <span>{link.label === 'GitHub' || link.label === 'Source' ? 'View Repository' : `${link.label} Repo`}</span>
+                </a>
+              ))}
+
+              {otherSourceLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
+                >
+                  <Code2 className="w-4 h-4" />
+                  <span>{link.label === 'Source' ? 'View Source' : link.label}</span>
                 </a>
               ))}
 

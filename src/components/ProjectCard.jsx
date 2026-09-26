@@ -1,6 +1,6 @@
-import { ExternalLink, ArrowUpRight } from 'lucide-react';
+import { ExternalLink, ArrowUpRight, Code2 } from 'lucide-react';
 import { GithubIcon } from './Icons';
-import { getProjectGithubLinks } from '../data/projects';
+import { getProjectGithubLinks, getProjectOtherSourceLinks } from '../data/projects';
 
 export default function ProjectCard({ project, onSelect }) {
   const {
@@ -14,6 +14,7 @@ export default function ProjectCard({ project, onSelect }) {
   } = project;
 
   const githubLinks = getProjectGithubLinks(project);
+  const otherSourceLinks = getProjectOtherSourceLinks(project);
 
   return (
     <div
@@ -81,6 +82,21 @@ export default function ProjectCard({ project, onSelect }) {
               aria-label={`${link.label} repository for ${title}`}
             >
               <GithubIcon className="w-3.5 h-3.5" />
+              <span>{link.label}</span>
+            </a>
+          ))}
+
+          {otherSourceLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors py-1 px-2 rounded hover:bg-white/[0.05]"
+              aria-label={`${link.label} code for ${title}`}
+            >
+              <Code2 className="w-3.5 h-3.5" />
               <span>{link.label}</span>
             </a>
           ))}
