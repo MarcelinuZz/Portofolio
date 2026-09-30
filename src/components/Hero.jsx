@@ -63,7 +63,7 @@ export default function Hero({ onTriggerTransition }) {
             ))}
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 w-full">
             <SocialLinks variant="minimal" />
           </div>
         </motion.div>

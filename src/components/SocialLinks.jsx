@@ -36,7 +36,7 @@ export default function SocialLinks({ className = '', variant = 'minimal' }) {
 
   // Minimal inline list for subtle display
   return (
-    <nav aria-label="Social connections" className={`flex items-center gap-5 sm:gap-7 ${className}`}>
+    <nav aria-label="Social connections" className={`flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2.5 ${className}`}>
       {socialLinks.map((item) => {
         const Icon = iconMap[item.name] || MessageCircle;
         const displayName = item.name === 'WhatsApp' ? 'Contact' : item.name;
@@ -46,7 +46,7 @@ export default function SocialLinks({ className = '', variant = 'minimal' }) {
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors duration-200"
+            className="group inline-flex items-center gap-1.5 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors duration-200 shrink-0"
             aria-label={item.label}
           >
             <Icon className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 transition-colors" />
