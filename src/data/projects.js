@@ -80,6 +80,27 @@ export const projectsData = [
     keyLearning:
       'Hosting Website, Website Performance, SEO'
   },
+    {
+    id: 'wutheringwares',
+    title: 'WutheringWares',
+    category: 'Software Development',
+    featured: true,
+    shortDescription: 'In-game item marketplace app',
+    image: '/images/projects/Wuthering.webp',
+    technologies: ['html', 'css', 'javascript'],
+    github: {
+      frontend: 'https://github.com/MarcelinuZz/WutheringWaresFE',
+      backend: 'https://github.com/MarcelinuZz/WutheringWaresBE'
+    },
+    source: null,
+    liveDemo: null, 
+    overview:
+      'A full-stack marketplace application built to handle in-game item transactions. Designed with strict role management, providing administrators with a dedicated dashboard to add and manage item. For the user-facing side, the app delivers a smooth browsing and purchasing experience, backed by reliable sandbox transaction simulations (via Midtrans) to ensure checkout stability.',
+    myContribution:
+      'Building entire backend and frontend for aplication',
+    keyLearning:
+      'Static File Serving, Oauth2 with google and discord'
+  },
   {
     id: 'ai-health-assistant',
     title: 'PastiBisa',
