@@ -27,7 +27,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative w-full border-t border-white/[0.08] bg-[#07080b] py-10 px-6 sm:px-12 lg:px-20 text-slate-400">
+    <footer className="relative w-full border-t border-white/[0.06] bg-[#080A0D]/70 backdrop-blur-sm py-10 px-6 sm:px-12 lg:px-20 text-slate-400">
       <div className="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         
         {/* Left: Branding & Tagline */}

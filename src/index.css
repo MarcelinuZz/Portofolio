@@ -68,3 +68,29 @@
   outline: 2px solid #e5ad68;
   outline-offset: 3px;
 }
+
+/* Second page (Journey) ambient celestial gradient background */
+.journey-page {
+  background-color: #0b0d11;
+  background-image:
+    radial-gradient(
+      ellipse 85% 55% at 50% 0%,
+      rgba(232, 166, 72, 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      circle at 85% 30%,
+      rgba(232, 166, 72, 0.08),
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      #181d28 0%,
+      #11151e 30%,
+      #0c0f16 65%,
+      #080a0e 100%
+    );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}

@@ -13,8 +13,17 @@ export default function Projects() {
       : projectsData.filter((p) => p.category === selectedCategory);
 
   return (
-    <section id="projects" className="relative w-full py-28 px-6 sm:px-12 lg:px-20 bg-[#0a0c10]">
-      <div className="w-full max-w-6xl mx-auto space-y-10">
+    <section id="projects" className="relative w-full py-28 px-6 sm:px-12 lg:px-20 bg-transparent overflow-hidden">
+      {/* Ambient background glow */}
+      <div
+        className="absolute top-1/4 -right-16 w-[500px] sm:w-[750px] h-[350px] sm:h-[450px] pointer-events-none -z-0"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, rgba(232, 166, 72, 0.09), transparent 70%)',
+          filter: 'blur(50px)'
+        }}
+        aria-hidden="true"
+      />
+      <div className="w-full max-w-6xl mx-auto space-y-10 relative z-10">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/[0.06]">

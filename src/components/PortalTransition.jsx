@@ -38,9 +38,9 @@ export default function PortalTransition({ isActive, onComplete }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.35, ease: 'easeOut' } }}
         >
-          {/* Deep cinematic backdrop dissolve into #0a0c10 (Journey background) */}
+          {/* Deep cinematic backdrop dissolve into #14171D (Journey top background tone) */}
           <motion.div
-            className="absolute inset-0 bg-[#0a0c10]"
+            className="absolute inset-0 bg-[#14171D]"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 0.3, 0.75, 1] }}
             transition={{ duration: 1.35, ease: 'easeInOut' }}

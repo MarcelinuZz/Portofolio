@@ -88,8 +88,17 @@ export default function JourneyPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0a0c10] text-[#f0f2f8] overflow-x-clip">
-      
+    <div className="journey-page relative min-h-screen text-[#f0f2f8] overflow-x-clip">
+      {/* Top ambient warm amber halo */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1100px] h-[340px] sm:h-[460px] pointer-events-none -z-0"
+        style={{
+          background: 'radial-gradient(ellipse at 50% 0%, rgba(232, 166, 72, 0.24), rgba(232, 166, 72, 0.08) 45%, transparent 75%)',
+          filter: 'blur(36px)'
+        }}
+        aria-hidden="true"
+      />
+
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-40 pointer-events-none">
         

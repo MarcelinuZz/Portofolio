@@ -13,7 +13,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative w-full py-28 px-6 sm:px-12 lg:px-20 bg-[#0a0c10]">
+    <section id="contact" className="relative w-full py-28 px-6 sm:px-12 lg:px-20 bg-transparent">
       <div className="w-full max-w-5xl mx-auto rounded-2xl bg-[#12151e] border border-white/10 p-8 sm:p-12 lg:p-14 shadow-xl relative overflow-hidden">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">

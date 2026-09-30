@@ -184,7 +184,7 @@ export default function Journey() {
       ref={sectionRef}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full bg-[#0a0c10]"
+      className="relative w-full bg-transparent"
     >
       {!isMobile ? (
         <div className="relative w-full h-screen min-h-[640px] flex flex-col justify-between pt-20 pb-8 overflow-hidden">
