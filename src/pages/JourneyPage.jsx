@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Menu, X } from 'lucide-react';
+import PortalEntryTransition from '../components/PortalEntryTransition';
 import Journey from '../components/Journey';
 import Projects from '../components/Projects';
 import Contact from '../components/Contact';
@@ -14,6 +15,7 @@ const navSections = [
 ];
 
 export default function JourneyPage() {
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('journey');
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -89,8 +91,14 @@ export default function JourneyPage() {
 
   return (
     <div className="journey-page relative min-h-screen text-[#f0f2f8] overflow-x-clip">
-      {/* Top ambient warm amber halo */}
-      <div
+      {/* Celestial Portal Entry Animation resolving from About page */}
+      <PortalEntryTransition fromPortal={Boolean(location.state?.fromPortal)} />
+
+      {/* Top ambient warm amber halo - softly breathes in */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.0, delay: 0.1, ease: 'easeOut' }}
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1100px] h-[340px] sm:h-[460px] pointer-events-none -z-0"
         style={{
           background: 'radial-gradient(ellipse at 50% 0%, rgba(232, 166, 72, 0.24), rgba(232, 166, 72, 0.08) 45%, transparent 75%)',
@@ -100,7 +108,12 @@ export default function JourneyPage() {
       />
 
       {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 pointer-events-none">
+      <motion.header
+        className="fixed top-0 left-0 right-0 z-40 pointer-events-none"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+      >
         
         {/* DESKTOP NAVIGATION: Centered Floating Pill */}
         <div className="hidden md:flex justify-center items-center py-5 px-4">
@@ -168,7 +181,7 @@ export default function JourneyPage() {
             )}
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {/* MOBILE DROPDOWN MENU */}
       <AnimatePresence>
@@ -237,11 +250,16 @@ export default function JourneyPage() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="relative z-10 w-full flex flex-col">
+      <motion.main
+        className="relative z-10 w-full flex flex-col"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.05, ease: 'easeOut' }}
+      >
         <Journey />
         <Projects />
         <Contact />
-      </main>
+      </motion.main>
 
       <Footer />
     </div>

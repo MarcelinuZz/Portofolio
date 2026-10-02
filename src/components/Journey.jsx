@@ -193,18 +193,28 @@ export default function Journey() {
       {!isMobile ? (
         <div className="relative z-10 w-full h-screen min-h-[640px] flex flex-col justify-between pt-20 pb-8 overflow-hidden">
           
-          {/* Top Header */}
-          <div className="w-full max-w-6xl mx-auto px-6 sm:px-12 z-20 border-b border-white/[0.06] pb-4">
+          {/* Top Header - Smooth glide down */}
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full max-w-6xl mx-auto px-6 sm:px-12 z-20 border-b border-white/[0.06] pb-4"
+          >
              <div className="text-xs uppercase tracking-widest font-semibold text-[#e5ad68]">
               Explore
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
               My Journey in BINUS University
             </h2>
-          </div>
+          </motion.div>
 
-          {/* Horizontal Track Slider */}
-          <div className="relative w-full h-[62vh] flex items-center overflow-hidden">
+          {/* Horizontal Track Slider - Smooth elevation glide and scale settle */}
+          <motion.div
+            initial={{ opacity: 0, y: 22, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.85, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full h-[62vh] flex items-center overflow-hidden"
+          >
             <motion.div
               animate={{ x: `-${activeStep * 100}%` }}
               transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
@@ -222,10 +232,15 @@ export default function Journey() {
                 </div>
               ))}
             </motion.div>
-          </div>
+          </motion.div>
 
-          {/* Bottom Progress Bar, Step Indicator & Action Controls */}
-          <div className="w-full max-w-6xl mx-auto px-6 sm:px-12 z-20 flex items-center justify-between">
+          {/* Bottom Progress Bar, Step Indicator & Action Controls - Smooth fade & slide */}
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full max-w-6xl mx-auto px-6 sm:px-12 z-20 flex items-center justify-between"
+          >
             <div className="flex items-center gap-3">
               <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
@@ -275,11 +290,16 @@ export default function Journey() {
                 </button>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       ) : (
         /* MOBILE RESPONSIVE VERTICAL TIMELINE */
-        <div className="relative z-10 w-full max-w-3xl mx-auto px-6 py-12 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="relative z-10 w-full max-w-3xl mx-auto px-6 py-12 space-y-6"
+        >
           <div className="border-b border-white/[0.06] pb-4">
             <div className="text-xs uppercase tracking-widest font-semibold text-[#e5ad68] mb-1">
               Chronicles
@@ -342,7 +362,7 @@ export default function Journey() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       )}
     </section>
   );

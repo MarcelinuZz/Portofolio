@@ -57,19 +57,18 @@ export default function PortalTransition({ isActive, onComplete }) {
             transition={{ duration: 1.35, ease: 'easeOut' }}
           />
 
-          {/* Central soft warm amber glow core (NO blinding white) */}
+          {/* Central soft warm amber glow core (fixed dimensions + scale to prevent reflow) */}
           <motion.div
-            className="absolute rounded-full pointer-events-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none transform-gpu"
             style={{
               background:
-                'radial-gradient(circle, rgba(229,173,104,0.35) 0%, rgba(229,173,104,0.14) 35%, rgba(10,12,16,0) 70%)',
-              filter: 'blur(35px)'
+                'radial-gradient(circle, rgba(229,173,104,0.36) 0%, rgba(229,173,104,0.14) 38%, rgba(10,12,16,0) 70%)',
+              filter: 'blur(32px)',
+              willChange: 'transform, opacity'
             }}
-            initial={{ width: 140, height: 140, scale: 0.7, opacity: 0 }}
+            initial={{ scale: 0.25, opacity: 0 }}
             animate={{
-              width: ['140px', '800px', '2600px'],
-              height: ['140px', '800px', '2600px'],
-              scale: [0.7, 1.8, 3.4],
+              scale: [0.25, 1.4, 4.4],
               opacity: [0, 0.85, 0.3, 0]
             }}
             transition={{
@@ -80,17 +79,16 @@ export default function PortalTransition({ isActive, onComplete }) {
 
           {/* Celestial Astrolabe Ring 1: Clockwise rotating compass ring */}
           <motion.div
-            className="absolute rounded-full border border-[#e5ad68]/50 flex items-center justify-center pointer-events-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[440px] rounded-full border border-[#e5ad68]/50 flex items-center justify-center pointer-events-none transform-gpu"
             style={{
-              boxShadow: '0 0 25px rgba(229, 173, 104, 0.35)'
+              boxShadow: '0 0 25px rgba(229, 173, 104, 0.35)',
+              willChange: 'transform, opacity'
             }}
-            initial={{ width: 120, height: 120, scale: 0.6, rotate: 0, opacity: 0 }}
+            initial={{ scale: 0.25, rotate: 0, opacity: 0 }}
             animate={{
-              width: ['120px', '600px', '2200px'],
-              height: ['120px', '600px', '2200px'],
-              scale: [0.6, 1.5, 3.2],
-              rotate: [0, 75, 150],
-              opacity: [0, 0.9, 0]
+              scale: [0.25, 1.35, 4.0],
+              rotate: [0, 70, 145],
+              opacity: [0, 0.9, 0.25, 0]
             }}
             transition={{
               duration: 1.35,
@@ -106,18 +104,19 @@ export default function PortalTransition({ isActive, onComplete }) {
 
           {/* Celestial Astrolabe Ring 2: Counter-clockwise dashed ring */}
           <motion.div
-            className="absolute rounded-full border border-dashed border-[#e5ad68]/35 pointer-events-none"
-            initial={{ width: 180, height: 180, scale: 0.5, rotate: 0, opacity: 0 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full border border-dashed border-[#e5ad68]/35 pointer-events-none transform-gpu"
+            style={{
+              willChange: 'transform, opacity'
+            }}
+            initial={{ scale: 0.28, rotate: 0, opacity: 0 }}
             animate={{
-              width: ['180px', '850px', '2800px'],
-              height: ['180px', '850px', '2800px'],
-              scale: [0.5, 1.6, 3.6],
-              rotate: [0, -60, -120],
-              opacity: [0, 0.75, 0]
+              scale: [0.28, 1.45, 4.4],
+              rotate: [0, -55, -115],
+              opacity: [0, 0.75, 0.2, 0]
             }}
             transition={{
               duration: 1.35,
-              delay: 0.08,
+              delay: 0.06,
               ease: [0.22, 1, 0.36, 1]
             }}
           />
@@ -127,17 +126,18 @@ export default function PortalTransition({ isActive, onComplete }) {
             {particles.map((p) => (
               <motion.div
                 key={p.id}
-                className="absolute rounded-full bg-[#f5d7aa]"
+                className="absolute rounded-full bg-[#f5d7aa] transform-gpu"
                 style={{
                   width: `${p.size}px`,
                   height: `${p.size}px`,
-                  boxShadow: '0 0 10px rgba(229, 173, 104, 0.8)'
+                  boxShadow: '0 0 10px rgba(229, 173, 104, 0.8)',
+                  willChange: 'transform, opacity'
                 }}
                 initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
                 animate={{
-                  x: [0, p.x * 0.4, p.x],
-                  y: [0, p.y * 0.4, p.y],
-                  opacity: [0, 0.95, 0.7, 0],
+                  x: [0, p.x * 0.42, p.x],
+                  y: [0, p.y * 0.42, p.y],
+                  opacity: [0, 0.95, 0.55, 0],
                   scale: [0, 1.8, 0.6]
                 }}
                 transition={{

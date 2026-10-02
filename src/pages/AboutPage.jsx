@@ -13,7 +13,7 @@ export default function AboutPage() {
   };
 
   const handlePortalComplete = () => {
-    navigate('/Journey');
+    navigate('/Journey', { state: { fromPortal: true } });
   };
 
   return (

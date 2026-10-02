@@ -234,11 +234,15 @@ export default function JourneyGridBackground() {
       lastTime = now;
       ambientTime += delta;
 
-      // Lerp mouse positions and intensity
-      mouse.currentX += (mouse.targetX - mouse.currentX) * config.lerpFactor;
-      mouse.currentY += (mouse.targetY - mouse.currentY) * config.lerpFactor;
+      // Frame-rate independent lerp using delta time for rock-solid 60/120fps smoothness
+      const smoothFactor = prefersReducedMotion
+        ? 1
+        : 1 - Math.pow(Math.max(0, 1 - config.lerpFactor), delta * 60);
+
+      mouse.currentX += (mouse.targetX - mouse.currentX) * smoothFactor;
+      mouse.currentY += (mouse.targetY - mouse.currentY) * smoothFactor;
       mouse.currentIntensity +=
-        (mouse.targetIntensity - mouse.currentIntensity) * (config.lerpFactor * 0.9);
+        (mouse.targetIntensity - mouse.currentIntensity) * (smoothFactor * 0.9);
 
       ctx.clearRect(0, 0, width, height);
 
@@ -285,16 +289,16 @@ export default function JourneyGridBackground() {
 
       // -------------------------------------------------------------
       // Pass 1: BASE 'X' LATTICE WITH SOPHISTICATED MODULAR CADENCE
-      // Minor lines: warm bronze-brown (0.9px)
-      // Major lines (every 4th line): radiant antique gold (1.2px)
-      // Creates an architectural coordinate rhythm instead of flat wireframe
+      // Minor lines: warm bronze-brown (0.95px)
+      // Major lines (every 4th line): radiant antique gold (1.25px)
+      // Creates an architectural coordinate rhythm across 100% of the canvas
       // -------------------------------------------------------------
       const c1Base = startY - startX;
-      const totalK1 = numCols + numRows + 4;
-      const minK1 = -Math.ceil(height / cellSize) - 2;
+      const minK1 = -numCols - 4;
+      const maxK1 = numRows + 4;
 
       // 1A: Family 1 Lines (\)
-      for (let k = minK1; k <= totalK1; k++) {
+      for (let k = minK1; k <= maxK1; k++) {
         const C = c1Base + k * cellSize;
         const endpoints = getBoundaryEndpointsFamily1(C, width, height);
         if (endpoints) {
@@ -313,10 +317,10 @@ export default function JourneyGridBackground() {
 
       // 1B: Family 2 Lines (/)
       const c2Base = startX + startY;
-      const totalK2 = numCols + numRows + 4;
-      const minK2 = -2;
+      const minK2 = -4;
+      const maxK2 = numCols + numRows + 4;
 
-      for (let k = minK2; k <= totalK2; k++) {
+      for (let k = minK2; k <= maxK2; k++) {
         const C = c2Base + k * cellSize;
         const endpoints = getBoundaryEndpointsFamily2(C, width, height);
         if (endpoints) {
@@ -337,6 +341,7 @@ export default function JourneyGridBackground() {
       // Pass 2: FOCUSED LASER ILLUMINATION (REDUCED NUMBER OF LINES)
       // Tightly targeted on the primary crossing pair of lines under cursor.
       // Light spreads intensely along the exact lines to the canvas edges.
+      // GPU-accelerated multi-pass stroke rendering for 120fps fluid response.
       // -------------------------------------------------------------
       if (effectiveIntensity > 0.02) {
         // Tight influence distance: only the immediate line(s) catch light
@@ -376,21 +381,18 @@ export default function JourneyGridBackground() {
                   gradA.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
                   gradA.addColorStop(1, 'rgba(185, 85, 20, 0)');
 
-                  // Luminous bloom stroke
-                  ctx.save();
-                  ctx.shadowColor = 'rgba(245, 185, 95, 0.95)';
-                  ctx.shadowBlur = 16;
+                  // Outer ambient bloom stroke
                   ctx.strokeStyle = gradA;
-                  ctx.lineWidth = 3.6;
+                  ctx.lineWidth = 4.2;
+                  ctx.globalAlpha = 0.4;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(A.x, A.y);
                   ctx.stroke();
-                  ctx.restore();
 
-                  // Sharp laser core
-                  ctx.strokeStyle = gradA;
+                  // Sharp radiant core stroke
                   ctx.lineWidth = 1.7;
+                  ctx.globalAlpha = 1.0;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(A.x, A.y);
@@ -407,21 +409,18 @@ export default function JourneyGridBackground() {
                   gradB.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
                   gradB.addColorStop(1, 'rgba(185, 85, 20, 0)');
 
-                  // Luminous bloom stroke
-                  ctx.save();
-                  ctx.shadowColor = 'rgba(245, 185, 95, 0.95)';
-                  ctx.shadowBlur = 16;
+                  // Outer ambient bloom stroke
                   ctx.strokeStyle = gradB;
-                  ctx.lineWidth = 3.6;
+                  ctx.lineWidth = 4.2;
+                  ctx.globalAlpha = 0.4;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(B.x, B.y);
                   ctx.stroke();
-                  ctx.restore();
 
-                  // Sharp laser core
-                  ctx.strokeStyle = gradB;
+                  // Sharp radiant core stroke
                   ctx.lineWidth = 1.7;
+                  ctx.globalAlpha = 1.0;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(B.x, B.y);
@@ -465,21 +464,18 @@ export default function JourneyGridBackground() {
                   gradA.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
                   gradA.addColorStop(1, 'rgba(185, 85, 20, 0)');
 
-                  // Luminous bloom stroke
-                  ctx.save();
-                  ctx.shadowColor = 'rgba(245, 185, 95, 0.95)';
-                  ctx.shadowBlur = 16;
+                  // Outer ambient bloom stroke
                   ctx.strokeStyle = gradA;
-                  ctx.lineWidth = 3.6;
+                  ctx.lineWidth = 4.2;
+                  ctx.globalAlpha = 0.4;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(A.x, A.y);
                   ctx.stroke();
-                  ctx.restore();
 
-                  // Sharp laser core
-                  ctx.strokeStyle = gradA;
+                  // Sharp radiant core stroke
                   ctx.lineWidth = 1.7;
+                  ctx.globalAlpha = 1.0;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(A.x, A.y);
@@ -496,21 +492,18 @@ export default function JourneyGridBackground() {
                   gradB.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
                   gradB.addColorStop(1, 'rgba(185, 85, 20, 0)');
 
-                  // Luminous bloom stroke
-                  ctx.save();
-                  ctx.shadowColor = 'rgba(245, 185, 95, 0.95)';
-                  ctx.shadowBlur = 16;
+                  // Outer ambient bloom stroke
                   ctx.strokeStyle = gradB;
-                  ctx.lineWidth = 3.6;
+                  ctx.lineWidth = 4.2;
+                  ctx.globalAlpha = 0.4;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(B.x, B.y);
                   ctx.stroke();
-                  ctx.restore();
 
-                  // Sharp laser core
-                  ctx.strokeStyle = gradB;
+                  // Sharp radiant core stroke
                   ctx.lineWidth = 1.7;
+                  ctx.globalAlpha = 1.0;
                   ctx.beginPath();
                   ctx.moveTo(px, py);
                   ctx.lineTo(B.x, B.y);
@@ -520,6 +513,7 @@ export default function JourneyGridBackground() {
             }
           }
         }
+        ctx.globalAlpha = 1.0;
       }
 
       animId = requestAnimationFrame(render);
