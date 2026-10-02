@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { journeyExperiences } from '../data/journey';
 import JourneyPanel from './JourneyPanel';
+import JourneyGridBackground from './JourneyGridBackground';
 import { ArrowDown, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export default function Journey() {
@@ -184,10 +185,13 @@ export default function Journey() {
       ref={sectionRef}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full bg-transparent"
+      className="relative w-full bg-transparent overflow-hidden"
     >
+      {/* Animated interactive architectural grid background */}
+      <JourneyGridBackground />
+
       {!isMobile ? (
-        <div className="relative w-full h-screen min-h-[640px] flex flex-col justify-between pt-20 pb-8 overflow-hidden">
+        <div className="relative z-10 w-full h-screen min-h-[640px] flex flex-col justify-between pt-20 pb-8 overflow-hidden">
           
           {/* Top Header */}
           <div className="w-full max-w-6xl mx-auto px-6 sm:px-12 z-20 border-b border-white/[0.06] pb-4">
@@ -275,7 +279,7 @@ export default function Journey() {
         </div>
       ) : (
         /* MOBILE RESPONSIVE VERTICAL TIMELINE */
-        <div className="w-full max-w-3xl mx-auto px-6 py-12 space-y-6">
+        <div className="relative z-10 w-full max-w-3xl mx-auto px-6 py-12 space-y-6">
           <div className="border-b border-white/[0.06] pb-4">
             <div className="text-xs uppercase tracking-widest font-semibold text-[#e5ad68] mb-1">
               Chronicles
@@ -288,7 +292,7 @@ export default function Journey() {
           {journeyExperiences.map((experience) => (
             <div
               key={experience.id}
-              className="bg-[#12151e] border border-white/10 p-6 rounded-xl space-y-4"
+              className="bg-[#12151e]/95 backdrop-blur-md border border-[#e5ad68]/30 shadow-[0_0_25px_rgba(229,173,104,0.12),0_8px_24px_rgba(0,0,0,0.6)] p-6 rounded-xl space-y-4"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="font-mono text-lg font-bold text-[#e5ad68]">
@@ -314,7 +318,7 @@ export default function Journey() {
                 </div>
               )}
 
-              <div className="rounded-lg overflow-hidden border border-white/10 bg-[#0a0c10] aspect-video">
+              <div className="rounded-lg overflow-hidden border border-[#e5ad68]/35 shadow-[0_0_16px_rgba(229,173,104,0.18)] bg-[#0a0c10] aspect-video">
                 <img
                   src={experience.image}
                   alt={experience.title}
