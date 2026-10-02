@@ -98,7 +98,7 @@ export default function TiltedCard({
         className={`tilted-card-inner ${innerClassName}`}
         style={{
           width: imageSrc ? imageWidth : '100%',
-          height: imageSrc ? imageHeight : '100%',
+          height: imageSrc ? imageHeight : 'auto',
           rotateX,
           rotateY,
           scale

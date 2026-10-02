@@ -34,8 +34,11 @@
   transform-style: preserve-3d;
   will-change: transform;
   transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  outline: 1px solid transparent;
   border-radius: 20px;
-  border: 1.5px solid rgba(229, 173, 104, 0.40);
+  border: 1px solid rgba(229, 173, 104, 0.48);
   box-shadow: 
     0 0 25px rgba(229, 173, 104, 0.16),
     0 0 8px rgba(229, 173, 104, 0.25),
@@ -43,6 +46,7 @@
   transition: border-color 0.35s ease, box-shadow 0.35s ease;
   overflow: hidden;
   background-color: #12151e;
+  background-clip: padding-box;
 }
 
 .tilted-card-figure:hover .tilted-card-inner {

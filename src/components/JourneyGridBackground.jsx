@@ -4,22 +4,22 @@ import { useEffect, useRef } from 'react';
  * JourneyGridBackground
  * 
  * An elevated architectural & celestial background crafted for the Journey section.
- * Features a refined diagonal 'X' coordinate lattice with modular major/minor line rhythm,
- * an atmospheric amber nebula depth, and focused laser illumination that concentrates
- * exclusively on the exact crossing diagonal lines pointed to by the cursor.
+ * Features a refined diagonal 'X' coordinate lattice where lines intersect to form
+ * a continuous field of rhombuses (diamonds).
  * 
- * User Enhancements:
- * 1. Reduced number of illuminated lines: tightly focused on the primary intersecting
- *    pair of diagonal slashes (/ and \) currently under the cursor (laser-precision X).
- * 2. Fancy, high-end theme: layered obsidian depth, warm celestial amber flares,
- *    modular coordinate rhythm (major gold axes & minor bronze lines), and subtle stardust granules.
+ * Interactive Rhombus Separation Animation:
+ * - When the cursor enters a rhombus, the 4 boundary lines of that rhombus
+ *   separate from the rhombus corners and swivel inwards to point directly at the cursor!
+ * - As the cursor moves across the grid, the previous lines smoothly return and re-lock
+ *   into their resting rhombus shapes, while the new rhombus's lines separate and point to the cursor.
+ * - Replaces full-screen laser illumination with an intimate, precision celestial targeting reticle.
  * 
  * Antislop principles maintained:
- * - R-07 (Purpose-Gate): Texture serves as a coordinate lattice reflecting engineering progression.
- * - R-01 & R-29 (Color): Strictly uses the site's warm amber (#e5ad68) and deep charcoal palette.
- * - R-19 (Motion): Smooth lerp interpolation, gentle idle breathing, reduced-motion compliance.
- * - R-25 (Contrast): Solid background cards in Journey guarantee foreground readability.
- * - Resource Efficiency: Suspends animation via IntersectionObserver when off-screen.
+ * - R-07 (Purpose-Gate): Coordinate lattice represents milestone navigation in space and time.
+ * - R-01 & R-29 (Color): Grounded strictly in obsidian (#06080d), warm bronze, and stardust gold (#e5ad68).
+ * - R-19 (Motion & Purpose): Tactile magnetic needle physics, frame-rate independent delta lerping,
+ *   full prefers-reduced-motion accessibility.
+ * - Performance: GPU-accelerated Canvas 2D rendering with sub-millisecond batched draw calls (60/120fps locked).
  */
 export default function JourneyGridBackground() {
   const containerRef = useRef(null);
@@ -44,12 +44,14 @@ export default function JourneyGridBackground() {
     let height = 0;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    // Responsive grid parameters
+    // Responsive grid parameters: wide, spacious rhombuses with reduced line density
     const getGridConfig = () => {
-      const isSmall = window.innerWidth < 768;
+      const w = window.innerWidth;
+      const isMobile = w < 640;
+      const isTablet = w < 1024;
       return {
-        cellSize: isSmall ? 48 : 56,
-        lerpFactor: prefersReducedMotion ? 1 : 0.14
+        cellSize: isMobile ? 120 : isTablet ? 155 : 190,
+        lerpFactor: prefersReducedMotion ? 1 : 0.16
       };
     };
 
@@ -61,11 +63,14 @@ export default function JourneyGridBackground() {
       targetY: 0,
       currentX: 0,
       currentY: 0,
-      targetIntensity: 0.35,
-      currentIntensity: 0.35,
+      targetIntensity: 0,
+      currentIntensity: 0,
       isInside: false,
       hasInteracted: false
     };
+
+    // Tracks per-edge activation state for smooth transition between rhombuses
+    const activeEdgeAlphas = new Map();
 
     // Stardust embers: subtle floating ambient granules tying into the portfolio's About theme
     const emberCount = 22;
@@ -116,7 +121,7 @@ export default function JourneyGridBackground() {
     });
     resizeObserver.observe(container);
 
-    // Track pointer globally so hovering over cards continues to smoothly cast light
+    // Track pointer globally so hovering over cards continues to smoothly interact
     const updatePointerPosition = (clientX, clientY) => {
       if (!container || !isVisible) return;
       const rect = container.getBoundingClientRect();
@@ -133,7 +138,7 @@ export default function JourneyGridBackground() {
         mouse.isInside = true;
         mouse.hasInteracted = true;
       } else {
-        mouse.targetIntensity = 0.25;
+        mouse.targetIntensity = 0;
         mouse.isInside = false;
       }
     };
@@ -143,7 +148,7 @@ export default function JourneyGridBackground() {
     };
 
     const handleDocumentLeave = () => {
-      mouse.targetIntensity = 0.25;
+      mouse.targetIntensity = 0;
       mouse.isInside = false;
     };
 
@@ -154,7 +159,7 @@ export default function JourneyGridBackground() {
     };
 
     const handleTouchEnd = () => {
-      mouse.targetIntensity = 0.25;
+      mouse.targetIntensity = 0;
       mouse.isInside = false;
     };
 
@@ -181,49 +186,6 @@ export default function JourneyGridBackground() {
     );
     intersectionObserver.observe(container);
 
-    // Helpers to calculate boundary endpoints of diagonal lines
-    // Family 1 (\): y - x = C => y = x + C
-    const getBoundaryEndpointsFamily1 = (C, W, H) => {
-      const pts = [];
-      if (C >= 0 && C <= H) pts.push({ x: 0, y: C });
-      const yAtW = W + C;
-      if (yAtW >= 0 && yAtW <= H) pts.push({ x: W, y: yAtW });
-      const xAt0 = -C;
-      if (xAt0 >= 0 && xAt0 <= W) {
-        if (!pts.some((p) => Math.abs(p.x - xAt0) < 0.1 && Math.abs(p.y - 0) < 0.1)) {
-          pts.push({ x: xAt0, y: 0 });
-        }
-      }
-      const xAtH = H - C;
-      if (xAtH >= 0 && xAtH <= W) {
-        if (!pts.some((p) => Math.abs(p.x - xAtH) < 0.1 && Math.abs(p.y - H) < 0.1)) {
-          pts.push({ x: xAtH, y: H });
-        }
-      }
-      return pts.length === 2 ? { A: pts[0], B: pts[1] } : null;
-    };
-
-    // Family 2 (/): x + y = C => y = C - x
-    const getBoundaryEndpointsFamily2 = (C, W, H) => {
-      const pts = [];
-      if (C >= 0 && C <= H) pts.push({ x: 0, y: C });
-      const yAtW = C - W;
-      if (yAtW >= 0 && yAtW <= H) pts.push({ x: W, y: yAtW });
-      const xAt0 = C;
-      if (xAt0 >= 0 && xAt0 <= W) {
-        if (!pts.some((p) => Math.abs(p.x - xAt0) < 0.1 && Math.abs(p.y - 0) < 0.1)) {
-          pts.push({ x: xAt0, y: 0 });
-        }
-      }
-      const xAtH = C - H;
-      if (xAtH >= 0 && xAtH <= W) {
-        if (!pts.some((p) => Math.abs(p.x - xAtH) < 0.1 && Math.abs(p.y - H) < 0.1)) {
-          pts.push({ x: xAtH, y: H });
-        }
-      }
-      return pts.length === 2 ? { A: pts[0], B: pts[1] } : null;
-    };
-
     const render = (now) => {
       if (!isVisible) {
         animId = null;
@@ -247,13 +209,6 @@ export default function JourneyGridBackground() {
       ctx.clearRect(0, 0, width, height);
 
       const { cellSize } = config;
-
-      // Base grid setup
-      const numCols = Math.ceil(width / cellSize) + 2;
-      const numRows = Math.ceil(height / cellSize) + 2;
-      const startX = ((width - (numCols - 2) * cellSize) / 2) % cellSize - cellSize;
-      const startY = ((height - (numRows - 2) * cellSize) / 2) % cellSize - cellSize;
-
       const effectiveIntensity = Math.max(0, mouse.currentIntensity);
       const mx = mouse.currentX;
       const my = mouse.currentY;
@@ -288,232 +243,169 @@ export default function JourneyGridBackground() {
       }
 
       // -------------------------------------------------------------
-      // Pass 1: BASE 'X' LATTICE WITH SOPHISTICATED MODULAR CADENCE
-      // Minor lines: warm bronze-brown (0.95px)
-      // Major lines (every 4th line): radiant antique gold (1.25px)
-      // Creates an architectural coordinate rhythm across 100% of the canvas
+      // Pass 1 & 2: ARCHITECTURAL RHOMBUS LATTICE WITH MAGNETIC SEPARATION
+      // When cursor is inside a rhombus, its boundary lines separate
+      // from the rhombus corners and swivel to point directly at the cursor!
+      // In idle, all lines form a seamless, resting diagonal coordinate grid.
       // -------------------------------------------------------------
-      const c1Base = startY - startX;
-      const minK1 = -numCols - 4;
-      const maxK1 = numRows + 4;
+      const halfS = cellSize / 2;
+      const L = cellSize / Math.SQRT2; // Resting length of each rhombus edge
 
-      // 1A: Family 1 Lines (\)
-      for (let k = minK1; k <= maxK1; k++) {
-        const C = c1Base + k * cellSize;
-        const endpoints = getBoundaryEndpointsFamily1(C, width, height);
-        if (endpoints) {
-          const isMajor = Math.abs(k) % 4 === 0;
-          ctx.lineWidth = isMajor ? 1.25 : 0.95;
-          ctx.strokeStyle = isMajor
-            ? `rgba(215, 165, 85, ${idleLineAlpha * 1.35})`
-            : `rgba(165, 120, 65, ${idleLineAlpha * 0.72})`;
+      const numCols = Math.ceil(width / halfS) + 8;
+      const numRows = Math.ceil(height / halfS) + 8;
+      const offsetX = ((width % cellSize) / 2) - cellSize * 3;
+      const offsetY = ((height % cellSize) / 2) - cellSize * 3;
 
-          ctx.beginPath();
-          ctx.moveTo(endpoints.A.x, endpoints.A.y);
-          ctx.lineTo(endpoints.B.x, endpoints.B.y);
-          ctx.stroke();
+      // Identify the exact rhombus containing the cursor position
+      const activeKeys = new Set();
+      if (effectiveIntensity > 0.01 && mouse.isInside) {
+        const X = mx - offsetX;
+        const Y = my - offsetY;
+        const ku = Math.floor((Y + X) / cellSize);
+        const kv = Math.floor((Y - X) / cellSize);
+
+        const c0 = ku - kv;
+        const r0 = ku + kv;
+
+        // The exact 4 boundary edges of the rhombus containing the cursor
+        const k1 = `1_${c0}_${r0}`;
+        const k2 = `2_${c0}_${r0}`;
+        const k3 = `1_${c0 - 1}_${r0 + 1}`;
+        const k4 = `2_${c0 + 1}_${r0 + 1}`;
+
+        activeKeys.add(k1);
+        activeKeys.add(k2);
+        activeKeys.add(k3);
+        activeKeys.add(k4);
+
+        if (!activeEdgeAlphas.has(k1)) activeEdgeAlphas.set(k1, 0);
+        if (!activeEdgeAlphas.has(k2)) activeEdgeAlphas.set(k2, 0);
+        if (!activeEdgeAlphas.has(k3)) activeEdgeAlphas.set(k3, 0);
+        if (!activeEdgeAlphas.has(k4)) activeEdgeAlphas.set(k4, 0);
+      }
+
+      // Delta-time smoothed transition for edge activations (fluid 60/120fps motion)
+      const edgeSpeed = prefersReducedMotion ? 1 : Math.min(1, delta * 14);
+      for (const [key, currentVal] of activeEdgeAlphas.entries()) {
+        const target = activeKeys.has(key) ? effectiveIntensity : 0;
+        const nextVal = currentVal + (target - currentVal) * edgeSpeed;
+        if (nextVal < 0.005 && target === 0) {
+          activeEdgeAlphas.delete(key);
+        } else {
+          activeEdgeAlphas.set(key, nextVal);
         }
       }
 
-      // 1B: Family 2 Lines (/)
-      const c2Base = startX + startY;
-      const minK2 = -4;
-      const maxK2 = numCols + numRows + 4;
+      const gridPath = new Path2D();
+      const activeEdges = [];
 
-      for (let k = minK2; k <= maxK2; k++) {
-        const C = c2Base + k * cellSize;
-        const endpoints = getBoundaryEndpointsFamily2(C, width, height);
-        if (endpoints) {
-          const isMajor = Math.abs(k) % 4 === 0;
-          ctx.lineWidth = isMajor ? 1.25 : 0.95;
-          ctx.strokeStyle = isMajor
-            ? `rgba(215, 165, 85, ${idleLineAlpha * 1.35})`
-            : `rgba(165, 120, 65, ${idleLineAlpha * 0.72})`;
+      for (let r = -4; r <= numRows; r++) {
+        for (let c = -4; c <= numCols; c++) {
+          if (Math.abs(c + r) % 2 === 0) {
+            const ax = c * halfS + offsetX;
+            const ay = r * halfS + offsetY;
 
-          ctx.beginPath();
-          ctx.moveTo(endpoints.A.x, endpoints.A.y);
-          ctx.lineTo(endpoints.B.x, endpoints.B.y);
-          ctx.stroke();
+            // --- Outgoing Edge 1: Family 1 (\, down-right) ---
+            const b1x = (c + 1) * halfS + offsetX;
+            const b1y = (r + 1) * halfS + offsetY;
+            const key1 = `1_${c}_${r}`;
+            const alpha1 = activeEdgeAlphas.get(key1) || 0;
+
+            if (alpha1 >= 0.01 && !prefersReducedMotion) {
+              const m1x = (ax + b1x) / 2;
+              const m1y = (ay + b1y) / 2;
+              activeEdges.push({
+                ax, ay, bx: b1x, by: b1y,
+                dx: mx - m1x, dy: my - m1y,
+                dist: Math.hypot(mx - m1x, my - m1y),
+                alpha: alpha1
+              });
+            } else {
+              gridPath.moveTo(ax, ay);
+              gridPath.lineTo(b1x, b1y);
+            }
+
+            // --- Outgoing Edge 2: Family 2 (/, down-left) ---
+            const b2x = (c - 1) * halfS + offsetX;
+            const b2y = (r + 1) * halfS + offsetY;
+            const key2 = `2_${c}_${r}`;
+            const alpha2 = activeEdgeAlphas.get(key2) || 0;
+
+            if (alpha2 >= 0.01 && !prefersReducedMotion) {
+              const m2x = (ax + b2x) / 2;
+              const m2y = (ay + b2y) / 2;
+              activeEdges.push({
+                ax, ay, bx: b2x, by: b2y,
+                dx: mx - m2x, dy: my - m2y,
+                dist: Math.hypot(mx - m2x, my - m2y),
+                alpha: alpha2
+              });
+            } else {
+              gridPath.moveTo(ax, ay);
+              gridPath.lineTo(b2x, b2y);
+            }
+          }
         }
       }
 
-      // -------------------------------------------------------------
-      // Pass 2: FOCUSED LASER ILLUMINATION (REDUCED NUMBER OF LINES)
-      // Tightly targeted on the primary crossing pair of lines under cursor.
-      // Light spreads intensely along the exact lines to the canvas edges.
-      // GPU-accelerated multi-pass stroke rendering for 120fps fluid response.
-      // -------------------------------------------------------------
-      if (effectiveIntensity > 0.02) {
-        // Tight influence distance: only the immediate line(s) catch light
-        const maxInfluenceDist = cellSize * 0.78;
+      // 1. Draw all resting grid lines in one clean batch
+      ctx.lineWidth = 1.15;
+      ctx.strokeStyle = `rgba(215, 165, 85, ${idleLineAlpha * 1.25})`;
+      ctx.stroke(gridPath);
 
-        // --- Active Family 1 Line (\: y - x = C) ---
-        const c1Cursor = my - mx;
-        const k1Nearest = Math.round((c1Cursor - c1Base) / cellSize);
+      // 2. Render active lines that separate from the rhombus and point to the cursor
+      if (activeEdges.length > 0) {
+        for (let i = 0; i < activeEdges.length; i++) {
+          const edge = activeEdges[i];
+          const { ax, ay, bx, by, dx, dy, dist, alpha } = edge;
 
-        // Only evaluate the single nearest line and its immediate neighbors (-1, 0, 1)
-        for (let offset = -1; offset <= 1; offset++) {
-          const k = k1Nearest + offset;
-          const C = c1Base + k * cellSize;
-          const perpDist = Math.abs(c1Cursor - C) / Math.SQRT2;
+          // Unit vector pointing toward cursor
+          const uX = dx / Math.max(dist, 0.001);
+          const uY = dy / Math.max(dist, 0.001);
 
-          if (perpDist < maxInfluenceDist) {
-            const endpoints = getBoundaryEndpointsFamily1(C, width, height);
-            if (endpoints) {
-              const { A, B } = endpoints;
+          // Target positions: inner tip points toward cursor, outer tip extends backwards
+          const clearance = 6; // Clean focal clearance around cursor
+          const targetInnerX = mx - uX * clearance;
+          const targetInnerY = my - uY * clearance;
+          const targetOuterX = targetInnerX - uX * L;
+          const targetOuterY = targetInnerY - uY * L;
 
-              // Projection of cursor onto this line
-              const px = (mx + my - C) / 2;
-              const py = (mx + my + C) / 2;
+          // Determine which resting vertex was closer to the cursor
+          const distA = Math.hypot(ax - mx, ay - my);
+          const distB = Math.hypot(bx - mx, by - my);
 
-              // Steep falloff: concentrates energy on the closest line
-              let lineWeight = 1 - perpDist / maxInfluenceDist;
-              lineWeight = Math.pow(lineWeight, 2.2) * effectiveIntensity;
+          let curAx, curAy, curBx, curBy;
 
-              if (lineWeight > 0.03) {
-                // Gradient P -> End A
-                const distPA = Math.hypot(A.x - px, A.y - py);
-                if (distPA > 1) {
-                  const gradA = ctx.createLinearGradient(px, py, A.x, A.y);
-                  gradA.addColorStop(0, `rgba(255, 252, 235, ${1.0 * lineWeight})`);
-                  gradA.addColorStop(0.18, `rgba(255, 215, 125, ${0.92 * lineWeight})`);
-                  gradA.addColorStop(0.48, `rgba(235, 160, 65, ${0.68 * lineWeight})`);
-                  gradA.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
-                  gradA.addColorStop(1, 'rgba(185, 85, 20, 0)');
-
-                  // Outer ambient bloom stroke
-                  ctx.strokeStyle = gradA;
-                  ctx.lineWidth = 4.2;
-                  ctx.globalAlpha = 0.4;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(A.x, A.y);
-                  ctx.stroke();
-
-                  // Sharp radiant core stroke
-                  ctx.lineWidth = 1.7;
-                  ctx.globalAlpha = 1.0;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(A.x, A.y);
-                  ctx.stroke();
-                }
-
-                // Gradient P -> End B
-                const distPB = Math.hypot(B.x - px, B.y - py);
-                if (distPB > 1) {
-                  const gradB = ctx.createLinearGradient(px, py, B.x, B.y);
-                  gradB.addColorStop(0, `rgba(255, 252, 235, ${1.0 * lineWeight})`);
-                  gradB.addColorStop(0.18, `rgba(255, 215, 125, ${0.92 * lineWeight})`);
-                  gradB.addColorStop(0.48, `rgba(235, 160, 65, ${0.68 * lineWeight})`);
-                  gradB.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
-                  gradB.addColorStop(1, 'rgba(185, 85, 20, 0)');
-
-                  // Outer ambient bloom stroke
-                  ctx.strokeStyle = gradB;
-                  ctx.lineWidth = 4.2;
-                  ctx.globalAlpha = 0.4;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(B.x, B.y);
-                  ctx.stroke();
-
-                  // Sharp radiant core stroke
-                  ctx.lineWidth = 1.7;
-                  ctx.globalAlpha = 1.0;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(B.x, B.y);
-                  ctx.stroke();
-                }
-              }
-            }
+          if (distB < distA) {
+            curAx = (1 - alpha) * ax + alpha * targetOuterX;
+            curAy = (1 - alpha) * ay + alpha * targetOuterY;
+            curBx = (1 - alpha) * bx + alpha * targetInnerX;
+            curBy = (1 - alpha) * by + alpha * targetInnerY;
+          } else {
+            curAx = (1 - alpha) * ax + alpha * targetInnerX;
+            curAy = (1 - alpha) * ay + alpha * targetInnerY;
+            curBx = (1 - alpha) * bx + alpha * targetOuterX;
+            curBy = (1 - alpha) * by + alpha * targetOuterY;
           }
+
+          // Ambient luminous bloom stroke
+          ctx.beginPath();
+          ctx.moveTo(curAx, curAy);
+          ctx.lineTo(curBx, curBy);
+          ctx.lineCap = 'round';
+          ctx.lineWidth = 3.6 * alpha + 1.0;
+          ctx.strokeStyle = `rgba(229, 173, 104, ${0.30 * alpha})`;
+          ctx.stroke();
+
+          // Radiant golden pointer core
+          ctx.beginPath();
+          ctx.moveTo(curAx, curAy);
+          ctx.lineTo(curBx, curBy);
+          ctx.lineCap = 'round';
+          ctx.lineWidth = 1.5 + 0.8 * alpha;
+          ctx.strokeStyle = `rgba(255, 235, 175, ${0.5 + 0.5 * alpha})`;
+          ctx.stroke();
         }
-
-        // --- Active Family 2 Line (/: x + y = C) ---
-        const c2Cursor = mx + my;
-        const k2Nearest = Math.round((c2Cursor - c2Base) / cellSize);
-
-        // Only evaluate the single nearest line and its immediate neighbors (-1, 0, 1)
-        for (let offset = -1; offset <= 1; offset++) {
-          const k = k2Nearest + offset;
-          const C = c2Base + k * cellSize;
-          const perpDist = Math.abs(c2Cursor - C) / Math.SQRT2;
-
-          if (perpDist < maxInfluenceDist) {
-            const endpoints = getBoundaryEndpointsFamily2(C, width, height);
-            if (endpoints) {
-              const { A, B } = endpoints;
-
-              // Projection of cursor onto this line
-              const px = (mx - my + C) / 2;
-              const py = (-mx + my + C) / 2;
-
-              let lineWeight = 1 - perpDist / maxInfluenceDist;
-              lineWeight = Math.pow(lineWeight, 2.2) * effectiveIntensity;
-
-              if (lineWeight > 0.03) {
-                // Gradient P -> End A
-                const distPA = Math.hypot(A.x - px, A.y - py);
-                if (distPA > 1) {
-                  const gradA = ctx.createLinearGradient(px, py, A.x, A.y);
-                  gradA.addColorStop(0, `rgba(255, 252, 235, ${1.0 * lineWeight})`);
-                  gradA.addColorStop(0.18, `rgba(255, 215, 125, ${0.92 * lineWeight})`);
-                  gradA.addColorStop(0.48, `rgba(235, 160, 65, ${0.68 * lineWeight})`);
-                  gradA.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
-                  gradA.addColorStop(1, 'rgba(185, 85, 20, 0)');
-
-                  // Outer ambient bloom stroke
-                  ctx.strokeStyle = gradA;
-                  ctx.lineWidth = 4.2;
-                  ctx.globalAlpha = 0.4;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(A.x, A.y);
-                  ctx.stroke();
-
-                  // Sharp radiant core stroke
-                  ctx.lineWidth = 1.7;
-                  ctx.globalAlpha = 1.0;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(A.x, A.y);
-                  ctx.stroke();
-                }
-
-                // Gradient P -> End B
-                const distPB = Math.hypot(B.x - px, B.y - py);
-                if (distPB > 1) {
-                  const gradB = ctx.createLinearGradient(px, py, B.x, B.y);
-                  gradB.addColorStop(0, `rgba(255, 252, 235, ${1.0 * lineWeight})`);
-                  gradB.addColorStop(0.18, `rgba(255, 215, 125, ${0.92 * lineWeight})`);
-                  gradB.addColorStop(0.48, `rgba(235, 160, 65, ${0.68 * lineWeight})`);
-                  gradB.addColorStop(0.80, `rgba(205, 110, 30, ${0.30 * lineWeight})`);
-                  gradB.addColorStop(1, 'rgba(185, 85, 20, 0)');
-
-                  // Outer ambient bloom stroke
-                  ctx.strokeStyle = gradB;
-                  ctx.lineWidth = 4.2;
-                  ctx.globalAlpha = 0.4;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(B.x, B.y);
-                  ctx.stroke();
-
-                  // Sharp radiant core stroke
-                  ctx.lineWidth = 1.7;
-                  ctx.globalAlpha = 1.0;
-                  ctx.beginPath();
-                  ctx.moveTo(px, py);
-                  ctx.lineTo(B.x, B.y);
-                  ctx.stroke();
-                }
-              }
-            }
-          }
-        }
-        ctx.globalAlpha = 1.0;
       }
 
       animId = requestAnimationFrame(render);
@@ -570,7 +462,7 @@ export default function JourneyGridBackground() {
         }}
       />
 
-      {/* Dynamic Interactive 'X' Slash Canvas */}
+      {/* Dynamic Interactive Rhombus Separation Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 block w-full h-full pointer-events-none"

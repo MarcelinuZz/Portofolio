@@ -191,7 +191,7 @@ export default function Journey() {
       <JourneyGridBackground />
 
       {!isMobile ? (
-        <div className="relative z-10 w-full h-screen min-h-[640px] flex flex-col justify-between pt-20 pb-8 overflow-hidden">
+        <div className="relative z-10 w-full min-h-screen lg:h-screen min-h-[680px] flex flex-col justify-between pt-16 sm:pt-20 pb-6 sm:pb-8 overflow-hidden">
           
           {/* Top Header - Smooth glide down */}
           <motion.div
@@ -213,7 +213,7 @@ export default function Journey() {
             initial={{ opacity: 0, y: 22, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.85, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full h-[62vh] flex items-center overflow-hidden"
+            className="relative w-full flex-1 min-h-[460px] flex items-center overflow-hidden py-4 sm:py-6"
           >
             <motion.div
               animate={{ x: `-${activeStep * 100}%` }}
