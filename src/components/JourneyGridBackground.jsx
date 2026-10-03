@@ -72,6 +72,10 @@ export default function JourneyGridBackground() {
     // Tracks per-edge activation state for smooth transition between rhombuses
     const activeEdgeAlphas = new Map();
 
+    // Intro weave animation state: Top-Left -> Bottom-Right (\), then Top-Right -> Bottom-Left (/)
+    let introTime = 0;
+    let isIntroComplete = prefersReducedMotion;
+
     // Stardust embers: subtle floating ambient granules tying into the portfolio's About theme
     const emberCount = 22;
     let embers = [];
@@ -196,6 +200,13 @@ export default function JourneyGridBackground() {
       lastTime = now;
       ambientTime += delta;
 
+      if (!isIntroComplete) {
+        introTime += delta;
+        if (introTime >= 2.4) {
+          isIntroComplete = true;
+        }
+      }
+
       // Frame-rate independent lerp using delta time for rock-solid 60/120fps smoothness
       const smoothFactor = prefersReducedMotion
         ? 1
@@ -256,9 +267,21 @@ export default function JourneyGridBackground() {
       const offsetX = ((width % cellSize) / 2) - cellSize * 3;
       const offsetY = ((height % cellSize) / 2) - cellSize * 3;
 
-      // Identify the exact rhombus containing the cursor position
+      // Intro wave parameters: Top-Left -> Bottom-Right (\), then Top-Right -> Bottom-Left (/)
+      const w1Raw = Math.max(0, Math.min(1, (introTime - 0.15) / 1.05));
+      const wave1 = w1Raw < 0.5 ? 2 * w1Raw * w1Raw : 1 - Math.pow(-2 * w1Raw + 2, 2) / 2;
+
+      const w2Raw = Math.max(0, Math.min(1, (introTime - 0.85) / 1.05));
+      const wave2 = w2Raw < 0.5 ? 2 * w2Raw * w2Raw : 1 - Math.pow(-2 * w2Raw + 2, 2) / 2;
+
+      const minCoord = -cellSize * 3;
+      const maxCoord = width + height + cellSize * 3;
+      const coordRange = maxCoord - minCoord;
+      const waveSpan = 0.14;
+
+      // Identify the exact rhombus containing the cursor position (only after intro completes)
       const activeKeys = new Set();
-      if (effectiveIntensity > 0.01 && mouse.isInside) {
+      if (isIntroComplete && effectiveIntensity > 0.01 && mouse.isInside) {
         const X = mx - offsetX;
         const Y = my - offsetY;
         const ku = Math.floor((Y + X) / cellSize);
@@ -298,6 +321,8 @@ export default function JourneyGridBackground() {
 
       const gridPath = new Path2D();
       const activeEdges = [];
+      const introDrawingPath = new Path2D();
+      const sparks = [];
 
       for (let r = -4; r <= numRows; r++) {
         for (let c = -4; c <= numCols; c++) {
@@ -308,41 +333,94 @@ export default function JourneyGridBackground() {
             // --- Outgoing Edge 1: Family 1 (\, down-right) ---
             const b1x = (c + 1) * halfS + offsetX;
             const b1y = (r + 1) * halfS + offsetY;
-            const key1 = `1_${c}_${r}`;
-            const alpha1 = activeEdgeAlphas.get(key1) || 0;
 
-            if (alpha1 >= 0.01 && !prefersReducedMotion) {
+            let p1 = 1;
+            if (!isIntroComplete) {
               const m1x = (ax + b1x) / 2;
               const m1y = (ay + b1y) / 2;
-              activeEdges.push({
-                ax, ay, bx: b1x, by: b1y,
-                dx: mx - m1x, dy: my - m1y,
-                dist: Math.hypot(mx - m1x, my - m1y),
-                alpha: alpha1
-              });
-            } else {
-              gridPath.moveTo(ax, ay);
-              gridPath.lineTo(b1x, b1y);
+              const norm1 = (m1x + m1y - minCoord) / coordRange;
+              if (wave1 <= norm1 - waveSpan) {
+                p1 = 0;
+              } else if (wave1 >= norm1 + waveSpan) {
+                p1 = 1;
+              } else {
+                p1 = (wave1 - (norm1 - waveSpan)) / (2 * waveSpan);
+              }
+            }
+
+            if (p1 >= 1) {
+              const key1 = `1_${c}_${r}`;
+              const alpha1 = isIntroComplete ? (activeEdgeAlphas.get(key1) || 0) : 0;
+
+              if (alpha1 >= 0.01 && !prefersReducedMotion) {
+                const m1x = (ax + b1x) / 2;
+                const m1y = (ay + b1y) / 2;
+                activeEdges.push({
+                  ax, ay, bx: b1x, by: b1y,
+                  dx: mx - m1x, dy: my - m1y,
+                  dist: Math.hypot(mx - m1x, my - m1y),
+                  alpha: alpha1
+                });
+              } else {
+                gridPath.moveTo(ax, ay);
+                gridPath.lineTo(b1x, b1y);
+              }
+            } else if (p1 > 0) {
+              const curBx = ax + (b1x - ax) * p1;
+              const curBy = ay + (b1y - ay) * p1;
+              introDrawingPath.moveTo(ax, ay);
+              introDrawingPath.lineTo(curBx, curBy);
+              const intensity1 = Math.sin(p1 * Math.PI);
+              if (intensity1 > 0.12) {
+                sparks.push({ x: curBx, y: curBy, intensity: intensity1 });
+              }
             }
 
             // --- Outgoing Edge 2: Family 2 (/, down-left) ---
             const b2x = (c - 1) * halfS + offsetX;
             const b2y = (r + 1) * halfS + offsetY;
-            const key2 = `2_${c}_${r}`;
-            const alpha2 = activeEdgeAlphas.get(key2) || 0;
 
-            if (alpha2 >= 0.01 && !prefersReducedMotion) {
+            let p2 = 1;
+            if (!isIntroComplete) {
               const m2x = (ax + b2x) / 2;
               const m2y = (ay + b2y) / 2;
-              activeEdges.push({
-                ax, ay, bx: b2x, by: b2y,
-                dx: mx - m2x, dy: my - m2y,
-                dist: Math.hypot(mx - m2x, my - m2y),
-                alpha: alpha2
-              });
-            } else {
-              gridPath.moveTo(ax, ay);
-              gridPath.lineTo(b2x, b2y);
+              const dist2 = (width - m2x) + m2y;
+              const norm2 = (dist2 - minCoord) / coordRange;
+              if (wave2 <= norm2 - waveSpan) {
+                p2 = 0;
+              } else if (wave2 >= norm2 + waveSpan) {
+                p2 = 1;
+              } else {
+                p2 = (wave2 - (norm2 - waveSpan)) / (2 * waveSpan);
+              }
+            }
+
+            if (p2 >= 1) {
+              const key2 = `2_${c}_${r}`;
+              const alpha2 = isIntroComplete ? (activeEdgeAlphas.get(key2) || 0) : 0;
+
+              if (alpha2 >= 0.01 && !prefersReducedMotion) {
+                const m2x = (ax + b2x) / 2;
+                const m2y = (ay + b2y) / 2;
+                activeEdges.push({
+                  ax, ay, bx: b2x, by: b2y,
+                  dx: mx - m2x, dy: my - m2y,
+                  dist: Math.hypot(mx - m2x, my - m2y),
+                  alpha: alpha2
+                });
+              } else {
+                gridPath.moveTo(ax, ay);
+                gridPath.lineTo(b2x, b2y);
+              }
+            } else if (p2 > 0) {
+              const curBx2 = ax + (b2x - ax) * p2;
+              const curBy2 = ay + (b2y - ay) * p2;
+              introDrawingPath.moveTo(ax, ay);
+              introDrawingPath.lineTo(curBx2, curBy2);
+              const intensity2 = Math.sin(p2 * Math.PI);
+              if (intensity2 > 0.12) {
+                sparks.push({ x: curBx2, y: curBy2, intensity: intensity2 });
+              }
             }
           }
         }
@@ -352,6 +430,32 @@ export default function JourneyGridBackground() {
       ctx.lineWidth = 1.15;
       ctx.strokeStyle = `rgba(215, 165, 85, ${idleLineAlpha * 1.25})`;
       ctx.stroke(gridPath);
+
+      // 2. Render intro weaving wave (actively drawing lines with luminous bloom & spark heads)
+      if (!isIntroComplete) {
+        // Luminous ambient bloom on advancing threads
+        ctx.beginPath();
+        ctx.lineWidth = 3.6;
+        ctx.strokeStyle = 'rgba(229, 173, 104, 0.35)';
+        ctx.stroke(introDrawingPath);
+
+        // Radiant golden needle core
+        ctx.beginPath();
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = 'rgba(255, 238, 185, 0.90)';
+        ctx.stroke(introDrawingPath);
+
+        // Advancing celestial sparks at line tips
+        if (sparks.length > 0) {
+          for (let i = 0; i < sparks.length; i++) {
+            const sp = sparks[i];
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, 1.8 * sp.intensity + 0.6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 248, 225, ${0.95 * sp.intensity})`;
+            ctx.fill();
+          }
+        }
+      }
 
       // 2. Render active lines that separate from the rhombus and point to the cursor
       if (activeEdges.length > 0) {

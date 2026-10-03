@@ -34,11 +34,9 @@ export const journeyExperiences = [
     description:
       'After the BINUS IT Division interview, I realized that communication was an area I needed to improve. In my second semester, I challenged myself by applying for the Part-Time Laboratory Assistant position and was selected. Through teaching and assisting students, I developed my communication, public speaking, teaching, teamwork, and other technical skills.',
     technologies: [
-      'Communication',
-      'Teaching & Mentorship',
+      'Leadership',
+      'Teaching',
       'Public Speaking',
-      'Teamwork',
-      'Problem Solving',
       'Technical Curriculum'
     ],
     growthStage: 'Communication, Teaching & Leadership',
@@ -53,13 +51,12 @@ export const journeyExperiences = [
     period: 'Until Now',
     milestone: 'Hackathons',
     description:
-      'After becoming a Laboratory Assistant and expanding my connections, I began joining technology competitions with friends who share the same commitment and willingness to learn. Although we have yet to win, every competition has become an opportunity to learn, improve, and grow together. We hope to turn these experiences into our first win in the competitions ahead.',
+      'After becoming a Laboratory Assistant and expanding my connections, I began joining technology competitions with friends who share the same willingness to learn. Although we have yet to win, every competition has become an opportunity to learn, improve, and grow together. We hope to turn these experiences into our first win in the competitions ahead.',
     technologies: [
+      'Problem Solving',
       'Collaboration',
-      'Curiosity',
-      'Persistence',
+      'Teamwork',
       'Continuous Learning',
-      'Growth Mindset'
     ],
     growthStage: 'Resilience, Team Synergy & Exploration',
     accentColor: 'amber',

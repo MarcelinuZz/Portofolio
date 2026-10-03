@@ -1,9 +1,8 @@
 import { Calendar, Award } from 'lucide-react';
 import TiltedCard from './TiltedCard';
 
-export default function JourneyPanel({ experience, total }) {
+export default function JourneyPanel({ experience }) {
   const {
-    stepNumber,
     theme,
     title,
     period,
@@ -28,11 +27,6 @@ export default function JourneyPanel({ experience, total }) {
         showTooltip={false}
       >
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center p-6 sm:p-7 lg:p-8 relative">
-          
-          {/* Step indicator */}
-          <div className="absolute top-5 right-6 sm:right-8 font-mono text-xs select-none text-[#e5ad68]">
-            {stepNumber} / 0{total}
-          </div>
 
           {/* LEFT COLUMN: Narrative & Timeline (5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-center space-y-3.5 z-10">

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { journeyExperiences } from '../data/journey';
 import JourneyPanel from './JourneyPanel';
 import JourneyGridBackground from './JourneyGridBackground';
-import { ArrowDown, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 
 export default function Journey() {
   const sectionRef = useRef(null);
@@ -227,7 +227,6 @@ export default function Journey() {
                 >
                   <JourneyPanel
                     experience={experience}
-                    total={totalPanels}
                   />
                 </div>
               ))}
@@ -254,31 +253,9 @@ export default function Journey() {
               </span>
             </div>
 
-            {/* Interactive Navigation Controls */}
+            {/* Action Control: Proceed to Projects when final panel is reached */}
             <div className="flex items-center gap-3">
-              {activeStep > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
-                  aria-label="Previous milestone"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Previous</span>
-                </button>
-              )}
-
-              {activeStep < totalPanels - 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setActiveStep((prev) => Math.min(totalPanels - 1, prev + 1))}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-200 bg-white/[0.08] hover:bg-white/[0.14] hover:text-white border border-white/10 transition-colors cursor-pointer"
-                  aria-label="Next milestone"
-                >
-                  <span>Next milestone</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#e5ad68]" />
-                </button>
-              ) : (
+              {activeStep === totalPanels - 1 && (
                 <button
                   type="button"
                   onClick={scrollToProjects}
