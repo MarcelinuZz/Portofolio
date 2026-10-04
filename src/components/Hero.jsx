@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
 import { profileData } from '../data/profile';
 import { useParallax } from '../hooks/useParallax';
 import SocialLinks from './SocialLinks';
+import BubbleButton from './BubbleButton';
 import marcelinusImg from '../assets/marcelinus.png';
 
 export default function Hero({ onTriggerTransition }) {
@@ -19,24 +19,21 @@ export default function Hero({ onTriggerTransition }) {
   return (
     <section
       id="hero"
-      className="relative min-h-screen w-full flex flex-col justify-between pt-24 pb-14 px-6 sm:px-12 lg:px-20 overflow-hidden"
+      className="relative min-h-screen w-full flex flex-col justify-center py-10 px-4 sm:px-8 lg:px-10 xl:px-14 2xl:px-20 overflow-hidden"
     >
-      <motion.div
-        animate={
-          isActivating
-            ? { scale: 0.97, opacity: 0.35, filter: 'blur(3px)' }
-            : { scale: 1, opacity: 1, filter: 'blur(0px)' }
-        }
-        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-        className="flex-1 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center my-auto"
+      <div
+        className="hero-main-grid flex-1 w-full max-w-[1480px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 xl:gap-12 my-auto"
       >
-        
         {/* Left: Biography and Narrative */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={
+            isActivating
+              ? { scale: 0.97, opacity: 0.35, filter: 'blur(3px)' }
+              : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+          }
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-6 flex flex-col items-start z-10 space-y-6"
+          className="hero-bio-column w-full lg:w-auto lg:max-w-[420px] xl:max-w-[480px] 2xl:max-w-[520px] flex flex-col items-start z-10 space-y-6 order-1"
         >
           <div className="flex items-center gap-2.5 text-xs font-semibold tracking-wider uppercase text-[#e5ad68]">
             <span>{profileData.subtitle}</span>
@@ -48,7 +45,7 @@ export default function Hero({ onTriggerTransition }) {
             Marcelinus Wijaya Oey
           </h1>
 
-          <p className="text-sm sm:text-base leading-relaxed text-slate-300 font-normal max-w-xl text-left">
+          <p className="text-sm sm:text-base leading-relaxed text-slate-300 font-normal max-w-xl text-justify">
             {profileData.bio}
           </p>
 
@@ -68,15 +65,33 @@ export default function Hero({ onTriggerTransition }) {
           </div>
         </motion.div>
 
+        {/* Center: 3D Golden Bubble Transition Button */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="hero-center-action flex-shrink-0 flex flex-col items-center justify-center z-20 py-4 lg:py-0 order-3 lg:order-2 px-2"
+        >
+          <BubbleButton
+            onClick={handleButtonClick}
+            isActivating={isActivating}
+            imageSrc="/images/Alam4.jpg"
+          />
+        </motion.div>
+
         {/* Right: Large Portrait Integration */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={
+            isActivating
+              ? { scale: 0.97, opacity: 0.35, filter: 'blur(3px)' }
+              : { opacity: 1, scale: 1, filter: 'blur(0px)' }
+          }
           transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-6 flex justify-center lg:justify-end items-center relative"
+          className="hero-portrait-wrapper w-full lg:w-auto flex-shrink-0 flex justify-center lg:justify-end items-center relative order-2 lg:order-3"
         >
           <div
-            className="relative z-10 w-full max-w-[300px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-[420px] xl:max-w-[460px]"
+            className="hero-portrait-container relative z-10 w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[380px] xl:max-w-[420px]"
             style={{
               transform: `translate3d(${parallax.x * 0.12}px, ${parallax.y * 0.12}px, 0)`
             }}
@@ -99,55 +114,7 @@ export default function Hero({ onTriggerTransition }) {
             </div>
           </div>
         </motion.div>
-      </motion.div>
-
-      {/* Center Portal Transition Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        className="w-full flex flex-col items-center justify-center pt-6 z-20"
-      >
-        <button
-          type="button"
-          onClick={handleButtonClick}
-          disabled={isActivating}
-          aria-label="Enter Journey page"
-          className="group flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e5ad68] rounded-full p-2 transition-transform duration-300 hover:scale-105 active:scale-95 cursor-pointer disabled:cursor-default"
-        >
-          <div className="relative flex items-center justify-center">
-            {/* Immediate golden ripple ring on click */}
-            {isActivating && (
-              <motion.div
-                className="absolute -inset-2 rounded-full border border-[#e5ad68]/60"
-                initial={{ scale: 0.9, opacity: 0.8 }}
-                animate={{ scale: 2.0, opacity: 0 }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-              />
-            )}
-
-            <div
-              className={`w-14 h-14 rounded-full bg-[#161b26] border flex items-center justify-center shadow-lg transition-all duration-300 ${
-                isActivating
-                  ? 'border-[#e5ad68] shadow-[0_0_24px_rgba(229,173,104,0.5)] bg-[#e5ad68]/15'
-                  : 'border-white/20 group-hover:border-[#e5ad68]'
-              }`}
-            >
-              <ArrowDown
-                className={`w-5 h-5 transition-all duration-300 ${
-                  isActivating
-                    ? 'text-[#e5ad68] translate-y-0.5'
-                    : 'text-slate-300 group-hover:text-[#e5ad68] group-hover:translate-y-0.5'
-                }`}
-              />
-            </div>
-          </div>
-
-          <span className="mt-2 text-[11px] font-medium tracking-widest uppercase text-slate-400 group-hover:text-slate-200 transition-colors">
-            {isActivating ? 'Entering Journey...' : 'Explore Journey'}
-          </span>
-        </button>
-      </motion.div>
+      </div>
     </section>
   );
 }
