@@ -10,8 +10,24 @@ export default function BubbleButton({
   const containerRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [proximity, setProximity] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) return;
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -317,7 +333,7 @@ export default function BubbleButton({
       ringMat.dispose();
       if (currentTexture) currentTexture.dispose();
     };
-  }, [imageSrc]);
+  }, [imageSrc, isDesktop]);
 
   return (
     <div className="relative w-full max-w-7xl mx-auto flex items-center justify-center select-none px-2 sm:px-4">
@@ -328,12 +344,12 @@ export default function BubbleButton({
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         whileTap={{ scale: 0.98 }}
-        aria-label="Explore Journey via 3D Planet Bubble"
+        aria-label="Explore Journey"
         className="group relative w-full flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e5ad68] cursor-pointer disabled:cursor-default"
       >
         {/* Pendaran Cahaya Emas Luas di Belakang Komposisi */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] sm:w-[640px] md:w-[780px] lg:w-[940px] xl:w-[1080px] h-[300px] sm:h-[380px] md:h-[440px] lg:h-[500px] rounded-full bg-radial from-[#e5ad68]/35 via-[#d97706]/15 to-transparent blur-3xl transition-all duration-500 pointer-events-none -z-10"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] xs:w-[420px] sm:w-[640px] md:w-[780px] lg:w-[940px] xl:w-[1080px] h-[260px] xs:h-[320px] sm:h-[380px] md:h-[440px] lg:h-[500px] rounded-full bg-radial from-[#e5ad68]/35 via-[#d97706]/15 to-transparent blur-3xl transition-all duration-500 pointer-events-none -z-10"
           style={{
             transform: `translate(-50%, -50%) scale(${1.0 + proximity * 0.2 + (isHovered ? 0.1 : 0)})`,
             opacity: 0.45 + proximity * 0.35 + (isHovered ? 0.25 : 0)
@@ -343,16 +359,83 @@ export default function BubbleButton({
         {/* Pulsing Ripple Rings saat tombol diaktifkan */}
         {isActivating && (
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[480px] lg:h-[480px] rounded-full border-2 border-[#e5ad68] pointer-events-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[380px] sm:h-[380px] lg:w-[480px] lg:h-[480px] rounded-full border-2 border-[#e5ad68] pointer-events-none"
             initial={{ scale: 0.7, opacity: 1 }}
             animate={{ scale: 2.2, opacity: 0 }}
             transition={{ duration: 1.1, ease: 'easeOut', repeat: Infinity }}
           />
         )}
 
-        {/* Horizontal Row: EXPLORE [kiri] --- 3D CANVAS PROPORSIONAL [tengah] --- JOURNEY [kanan] */}
-        <div className="relative flex items-center justify-center w-full max-w-full">
-          
+        {/* 1. TAMPILAN MOBILE (< md): Komposisi Vertikal Responsif dengan Gambar 2D Planet */}
+        <div className="flex md:hidden flex-col items-center justify-center w-full px-3 text-center my-auto">
+          {/* Teks Atas: EXPLORE */}
+          <motion.span
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl xs:text-4xl sm:text-5xl font-black tracking-widest uppercase bg-gradient-to-r from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(229,173,104,0.4)] leading-tight select-none"
+          >
+            EXPLORE
+          </motion.span>
+
+          {/* Centerpiece Gambar 2D Planet dengan Cincin Kosmik Keemasan */}
+          <motion.div
+            animate={{ y: [-4, 4, -4] }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative my-2 xs:my-3 w-44 h-44 xs:w-52 xs:h-52 sm:w-60 sm:h-60 flex items-center justify-center select-none"
+          >
+            {/* Pendaran Cahaya Planet Atmosferik */}
+            <div className="absolute inset-0 rounded-full bg-radial from-[#e5ad68]/45 via-[#d97706]/20 to-transparent blur-2xl pointer-events-none scale-105" />
+
+            {/* Cincin Saturnus Kosmik Keemasan (2D Vector Styling) */}
+            <div
+              className="absolute inset-x-[-18%] top-[34%] h-[32%] rounded-[50%] border-2 border-[#e5ad68]/80 pointer-events-none -rotate-[16deg]"
+              style={{
+                boxShadow: '0 0 16px rgba(229, 173, 104, 0.45), inset 0 0 10px rgba(229, 173, 104, 0.35)'
+              }}
+            />
+            <div
+              className="absolute inset-x-[-26%] top-[30%] h-[40%] rounded-[50%] border border-[#e5ad68]/35 pointer-events-none -rotate-[16deg]"
+            />
+
+            {/* Gambar Bulat Planet (2D Image Sesuai Request User) */}
+            <div className="relative z-10 w-32 h-32 xs:w-36 xs:h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden border-2 border-[#e5ad68]/85 shadow-[0_0_35px_rgba(229,173,104,0.5),0_12px_28px_rgba(0,0,0,0.65)] bg-[#0d1017]">
+              <img
+                src={imageSrc}
+                alt="Explore Planet"
+                className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.98]"
+                loading="eager"
+              />
+              {/* Kilauan Kaca Melengkung (Specular Reflection) */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/[0.08] to-white/35 pointer-events-none" />
+              {/* Kedalaman Bayangan Sferis Interior */}
+              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_20px_rgba(0,0,0,0.7)] pointer-events-none" />
+            </div>
+          </motion.div>
+
+          {/* Teks Bawah: JOURNEY */}
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl xs:text-4xl sm:text-5xl font-black tracking-widest uppercase bg-gradient-to-l from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(229,173,104,0.4)] leading-tight select-none"
+          >
+            JOURNEY
+          </motion.span>
+
+          {/* Tombol Akselerasi Interaktif untuk Pengguna Layar Sentuh */}
+          <div className="mt-3 xs:mt-4 flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm border border-[#e5ad68]/40 shadow-lg active:scale-95 transition-transform">
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#e5ad68]">
+              {isActivating ? 'Entering Journey...' : 'Tap to Launch'}
+            </span>
+            <svg className="w-3.5 h-3.5 text-[#e5ad68] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </div>
+        </div>
+
+        {/* 2. TAMPILAN DESKTOP (md:flex): Horizontal EXPLORE [3D CANVAS] JOURNEY */}
+        <div className="hidden md:flex items-center justify-center w-full max-w-full">
           {/* SISI KIRI: EXPLORE (1 Baris) */}
           <motion.div
             animate={{
@@ -362,7 +445,7 @@ export default function BubbleButton({
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             className="flex-1 min-w-0 flex items-center justify-end text-right pr-4 sm:pr-6 md:pr-8 lg:pr-10 pointer-events-none select-none z-10"
           >
-            <span className="text-[clamp(1.5rem,4.6vw,5.75rem)] font-black tracking-tight sm:tracking-normal uppercase bg-gradient-to-r from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
+            <span className="text-[clamp(2rem,4.6vw,5.75rem)] font-black tracking-normal uppercase bg-gradient-to-r from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
               EXPLORE
             </span>
           </motion.div>
@@ -373,11 +456,11 @@ export default function BubbleButton({
               scale: isHovered ? 1.05 : 1,
             }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex-shrink-0 flex items-center justify-center z-20 -mx-3 xs:-mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 xl:-mx-12"
+            className="relative flex-shrink-0 flex items-center justify-center z-20 -mx-3 sm:-mx-6 md:-mx-8 lg:-mx-10 xl:-mx-12"
           >
             <div
               ref={containerRef}
-              className="relative w-[180px] xs:w-[220px] sm:w-[280px] md:w-[350px] lg:w-[420px] xl:w-[480px] h-[170px] xs:h-[200px] sm:h-[260px] md:h-[320px] lg:h-[380px] xl:h-[430px] flex items-center justify-center drop-shadow-[0_24px_56px_rgba(217,119,6,0.55)] cursor-pointer"
+              className="relative w-[340px] lg:w-[420px] xl:w-[480px] h-[300px] lg:h-[380px] xl:h-[430px] flex items-center justify-center drop-shadow-[0_24px_56px_rgba(217,119,6,0.55)] cursor-pointer"
             />
           </motion.div>
 
@@ -390,15 +473,14 @@ export default function BubbleButton({
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             className="flex-1 min-w-0 flex items-center justify-start text-left pl-4 sm:pl-6 md:pl-8 lg:pl-10 pointer-events-none select-none z-10"
           >
-            <span className="text-[clamp(1.5rem,4.6vw,5.75rem)] font-black tracking-tight sm:tracking-normal uppercase bg-gradient-to-l from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
+            <span className="text-[clamp(2rem,4.6vw,5.75rem)] font-black tracking-normal uppercase bg-gradient-to-l from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
               JOURNEY
             </span>
           </motion.div>
-
         </div>
 
-        {/* Indikator status mikro interaktif di bawah */}
-        <div className="absolute -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 pointer-events-none">
+        {/* Indikator status mikro interaktif di bawah (Desktop Only) */}
+        <div className="hidden md:flex absolute -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 items-center gap-2 pointer-events-none">
           <span
             className={`text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase transition-all duration-300 ${
               isActivating
