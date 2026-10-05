@@ -15,13 +15,13 @@ export default function BubbleButton({
     const container = containerRef.current;
     if (!container) return;
 
-    const width = 350;
-    const height = 240;
+    const width = 680;
+    const height = 480;
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 0, 4.4); // Ditarik agar cincin planet muat utuh tanpa terpotong tepi canvas
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+    camera.position.set(0, 0, 4.3); // Jarak ideal agar cincin leluasa vertikal dan tidak terpotong di batas atas
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -31,7 +31,7 @@ export default function BubbleButton({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
 
     // Responsive Resize Observer agar selalu pas di semua ukuran layar
@@ -42,7 +42,7 @@ export default function BubbleButton({
       if (w === 0 || h === 0) return;
       camera.aspect = w / h;
       const halfTan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-      const requiredZ = Math.max(4.4, (4.5 * h) / (w * 2 * halfTan));
+      const requiredZ = Math.max(4.3, (4.5 * h) / (w * 2 * halfTan));
       camera.position.z = requiredZ;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -245,16 +245,16 @@ export default function BubbleButton({
       const factor = Math.max(0, 1.0 - dist / maxDistance);
       setProximity(factor);
 
-      // Rotasi 3D tenang
-      const maxRotAngle = 0.36; // ~21 derajat
+      // Rotasi 3D tenang dan proporsional
+      const maxRotAngle = 0.28; // ~16 derajat (anggun & mencegah cincin terpotong di batas atas)
       targetRotY = (dx / (maxDistance * 0.85)) * maxRotAngle;
       targetRotX = (dy / (maxDistance * 0.85)) * maxRotAngle; // Inverted atas-bawah
 
       targetRotY = Math.max(-maxRotAngle, Math.min(maxRotAngle, targetRotY));
       targetRotX = Math.max(-maxRotAngle, Math.min(maxRotAngle, targetRotX));
 
-      targetShiftX = (dx / maxDistance) * 0.035;
-      targetShiftY = (dy / maxDistance) * 0.035; // Inverted atas-bawah
+      targetShiftX = (dx / maxDistance) * 0.025;
+      targetShiftY = (dy / maxDistance) * 0.015; // Pergeseran vertikal halus agar cincin tetap berada di dalam viewport
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
@@ -320,55 +320,95 @@ export default function BubbleButton({
   }, [imageSrc]);
 
   return (
-    <div className="flex flex-col items-center justify-center select-none">
+    <div className="relative w-full max-w-7xl mx-auto flex items-center justify-center select-none px-2 sm:px-4">
       <motion.button
         type="button"
         onClick={onClick}
         disabled={isActivating}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.98 }}
         aria-label="Explore Journey via 3D Planet Bubble"
-        className="group relative flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e5ad68] rounded-3xl cursor-pointer disabled:cursor-default"
+        className="group relative w-full flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e5ad68] cursor-pointer disabled:cursor-default"
       >
-        {/* Pendaran Cahaya Emas Belakang yang merespons jarak kursor */}
+        {/* Pendaran Cahaya Emas Luas di Belakang Komposisi */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[220px] rounded-full bg-radial from-[#e5ad68]/35 via-[#d97706]/15 to-transparent blur-2xl transition-all duration-300 pointer-events-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] sm:w-[640px] md:w-[780px] lg:w-[940px] xl:w-[1080px] h-[300px] sm:h-[380px] md:h-[440px] lg:h-[500px] rounded-full bg-radial from-[#e5ad68]/35 via-[#d97706]/15 to-transparent blur-3xl transition-all duration-500 pointer-events-none -z-10"
           style={{
-            transform: `translate(-50%, -50%) scale(${1.0 + proximity * 0.3 + (isHovered ? 0.15 : 0)})`,
-            opacity: 0.5 + proximity * 0.4 + (isHovered ? 0.2 : 0)
+            transform: `translate(-50%, -50%) scale(${1.0 + proximity * 0.2 + (isHovered ? 0.1 : 0)})`,
+            opacity: 0.45 + proximity * 0.35 + (isHovered ? 0.25 : 0)
           }}
         />
 
-        {/* Pulsing Ripple Rings on Activate */}
+        {/* Pulsing Ripple Rings saat tombol diaktifkan */}
         {isActivating && (
           <motion.div
-            className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[170px] h-[170px] rounded-full border-2 border-[#e5ad68]"
-            initial={{ scale: 0.8, opacity: 1 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[480px] lg:h-[480px] rounded-full border-2 border-[#e5ad68] pointer-events-none"
+            initial={{ scale: 0.7, opacity: 1 }}
             animate={{ scale: 2.2, opacity: 0 }}
-            transition={{ duration: 1.0, ease: 'easeOut', repeat: Infinity }}
+            transition={{ duration: 1.1, ease: 'easeOut', repeat: Infinity }}
           />
         )}
 
-        {/* 3D Canvas Container - Lebar leluasa agar cincin planet muat utuh */}
-        <div
-          ref={containerRef}
-          className="relative w-[320px] sm:w-[350px] h-[220px] sm:h-[240px] flex items-center justify-center drop-shadow-[0_16px_36px_rgba(217,119,6,0.45)]"
-        />
+        {/* Horizontal Row: EXPLORE [kiri] --- 3D CANVAS PROPORSIONAL [tengah] --- JOURNEY [kanan] */}
+        <div className="relative flex items-center justify-center w-full max-w-full">
+          
+          {/* SISI KIRI: EXPLORE (1 Baris) */}
+          <motion.div
+            animate={{
+              x: isHovered ? -12 : 0,
+              opacity: isActivating ? 0.45 : 1,
+            }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 min-w-0 flex items-center justify-end text-right pr-4 sm:pr-6 md:pr-8 lg:pr-10 pointer-events-none select-none z-10"
+          >
+            <span className="text-[clamp(1.5rem,4.6vw,5.75rem)] font-black tracking-tight sm:tracking-normal uppercase bg-gradient-to-r from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
+              EXPLORE
+            </span>
+          </motion.div>
 
-        {/* Interactive Text Label */}
-        <div className="mt-1 flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#161b26]/80 backdrop-blur-md border border-white/10 group-hover:border-[#e5ad68]/60 transition-all duration-300 shadow-lg">
+          {/* TENGAH: 3D Canvas Container (Proporsional & Seimbang) */}
+          <motion.div
+            animate={{
+              scale: isHovered ? 1.05 : 1,
+            }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="relative flex-shrink-0 flex items-center justify-center z-20 -mx-3 xs:-mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 xl:-mx-12"
+          >
+            <div
+              ref={containerRef}
+              className="relative w-[180px] xs:w-[220px] sm:w-[280px] md:w-[350px] lg:w-[420px] xl:w-[480px] h-[170px] xs:h-[200px] sm:h-[260px] md:h-[320px] lg:h-[380px] xl:h-[430px] flex items-center justify-center drop-shadow-[0_24px_56px_rgba(217,119,6,0.55)] cursor-pointer"
+            />
+          </motion.div>
+
+          {/* SISI KANAN: JOURNEY (1 Baris) */}
+          <motion.div
+            animate={{
+              x: isHovered ? 12 : 0,
+              opacity: isActivating ? 0.45 : 1,
+            }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 min-w-0 flex items-center justify-start text-left pl-4 sm:pl-6 md:pl-8 lg:pl-10 pointer-events-none select-none z-10"
+          >
+            <span className="text-[clamp(1.5rem,4.6vw,5.75rem)] font-black tracking-tight sm:tracking-normal uppercase bg-gradient-to-l from-white via-slate-100 to-[#e5ad68] bg-clip-text text-transparent drop-shadow-[0_4px_28px_rgba(229,173,104,0.35)] group-hover:drop-shadow-[0_8px_45px_rgba(229,173,104,0.7)] transition-all duration-500 leading-none whitespace-nowrap">
+              JOURNEY
+            </span>
+          </motion.div>
+
+        </div>
+
+        {/* Indikator status mikro interaktif di bawah */}
+        <div className="absolute -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 pointer-events-none">
           <span
-            className={`text-xs font-semibold tracking-widest uppercase transition-colors whitespace-nowrap ${
+            className={`text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase transition-all duration-300 ${
               isActivating
-                ? 'text-[#e5ad68]'
+                ? 'text-[#e5ad68] opacity-100 animate-pulse'
                 : isHovered
-                ? 'text-[#f6d198]'
-                : 'text-slate-300'
+                ? 'text-slate-300 opacity-90'
+                : 'text-slate-500 opacity-0'
             }`}
           >
-            {isActivating ? 'Entering Journey...' : 'Explore Journey'}
+            {isActivating ? 'Entering Journey...' : 'Click to Launch'}
           </span>
         </div>
       </motion.button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from '../components/Background';
 import PortalTransition from '../components/PortalTransition';
@@ -7,6 +7,10 @@ import Hero from '../components/Hero';
 export default function AboutPage() {
   const [isPortalActive, setIsPortalActive] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleTriggerPortal = () => {
     setIsPortalActive(true);
