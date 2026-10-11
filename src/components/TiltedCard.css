@@ -36,26 +36,15 @@
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  outline: 1px solid transparent;
-  border-radius: 20px;
-  border: 1px solid rgba(229, 173, 104, 0.48);
-  box-shadow: 
-    0 0 25px rgba(229, 173, 104, 0.16),
-    0 0 8px rgba(229, 173, 104, 0.25),
-    0 16px 48px rgba(0, 0, 0, 0.65);
-  transition: border-color 0.35s ease, box-shadow 0.35s ease;
-  overflow: hidden;
-  background-color: #12151e;
-  background-clip: padding-box;
+  outline: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .tilted-card-figure:hover .tilted-card-inner {
-  border-color: rgba(229, 173, 104, 0.85);
-  box-shadow: 
-    0 0 45px rgba(229, 173, 104, 0.38),
-    0 0 14px rgba(255, 230, 160, 0.40),
-    inset 0 0 20px rgba(229, 173, 104, 0.12),
-    0 24px 64px rgba(0, 0, 0, 0.80);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .tilted-card-img {

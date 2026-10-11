@@ -1,7 +1,3 @@
-/**
- * Centralized Projects Data (Section 3)
- * Easily add or edit projects by modifying or appending objects here.
- */
 export const projectsData = [
   {
     id: 'pocketlog',

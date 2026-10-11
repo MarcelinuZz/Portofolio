@@ -1,26 +1,245 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * JourneyGridBackground
- * 
- * An elevated architectural & celestial background crafted for the Journey section.
- * Features a refined diagonal 'X' coordinate lattice where lines intersect to form
- * a continuous field of rhombuses (diamonds).
- * 
- * Interactive Rhombus Separation Animation:
- * - When the cursor enters a rhombus, the 4 boundary lines of that rhombus
- *   separate from the rhombus corners and swivel inwards to point directly at the cursor!
- * - As the cursor moves across the grid, the previous lines smoothly return and re-lock
- *   into their resting rhombus shapes, while the new rhombus's lines separate and point to the cursor.
- * - Replaces full-screen laser illumination with an intimate, precision celestial targeting reticle.
- * 
- * Antislop principles maintained:
- * - R-07 (Purpose-Gate): Coordinate lattice represents milestone navigation in space and time.
- * - R-01 & R-29 (Color): Grounded strictly in obsidian (#06080d), warm bronze, and stardust gold (#e5ad68).
- * - R-19 (Motion & Purpose): Tactile magnetic needle physics, frame-rate independent delta lerping,
- *   full prefers-reduced-motion accessibility.
- * - Performance: GPU-accelerated Canvas 2D rendering with sub-millisecond batched draw calls (60/120fps locked).
- */
+// Normalized astronomical constellation templates [0..1, 0..1]
+const CONSTELLATIONS = [
+  {
+    // Orion (Sang Pemburu)
+    stars: [
+      { x: 0.22, y: 0.18, size: 2.8, color: '#f59e0b', flare: true }, // Betelgeuse
+      { x: 0.78, y: 0.20, size: 2.4, color: '#e0f2fe', flare: true }, // Bellatrix
+      { x: 0.38, y: 0.48, size: 1.9, color: '#ffffff', flare: false }, // Alnitak
+      { x: 0.50, y: 0.50, size: 1.9, color: '#ffffff', flare: false }, // Alnilam
+      { x: 0.62, y: 0.52, size: 1.9, color: '#ffffff', flare: false }, // Mintaka
+      { x: 0.28, y: 0.85, size: 2.2, color: '#e2e8f0', flare: false }, // Saiph
+      { x: 0.82, y: 0.82, size: 3.0, color: '#bae6fd', flare: true }, // Rigel
+      { x: 0.50, y: 0.08, size: 1.6, color: '#e2e8f0', flare: false }  // Meissa
+    ],
+    edges: [
+      [7, 0], [7, 1], [0, 2], [1, 4],
+      [2, 3], [3, 4], [2, 5], [4, 6], [5, 6]
+    ]
+  },
+  {
+    // Ursa Major (Bintang Biduk)
+    stars: [
+      { x: 0.05, y: 0.45, size: 2.3, color: '#ffffff', flare: false },
+      { x: 0.20, y: 0.38, size: 2.1, color: '#ffffff', flare: false },
+      { x: 0.35, y: 0.35, size: 1.9, color: '#fef3c7', flare: false },
+      { x: 0.50, y: 0.30, size: 1.8, color: '#e2e8f0', flare: false },
+      { x: 0.52, y: 0.56, size: 2.2, color: '#ffffff', flare: false },
+      { x: 0.74, y: 0.52, size: 2.5, color: '#e0f2fe', flare: true },
+      { x: 0.78, y: 0.26, size: 2.6, color: '#fef08a', flare: true }
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3],
+      [3, 4], [4, 5], [5, 6], [6, 3]
+    ]
+  },
+  {
+    // Cassiopeia ('W')
+    stars: [
+      { x: 0.08, y: 0.40, size: 2.2, color: '#e2e8f0', flare: false },
+      { x: 0.28, y: 0.70, size: 2.6, color: '#fef08a', flare: true },
+      { x: 0.50, y: 0.32, size: 2.7, color: '#e0f2fe', flare: true },
+      { x: 0.72, y: 0.65, size: 2.1, color: '#e2e8f0', flare: false },
+      { x: 0.92, y: 0.28, size: 2.0, color: '#ffffff', flare: false }
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3], [3, 4]
+    ]
+  },
+  {
+    // Cygnus (Salib Utara / Angsa)
+    stars: [
+      { x: 0.50, y: 0.10, size: 2.9, color: '#e0f2fe', flare: true }, // Deneb
+      { x: 0.50, y: 0.46, size: 2.4, color: '#fef08a', flare: true }, // Sadr
+      { x: 0.50, y: 0.90, size: 2.2, color: '#f59e0b', flare: false }, // Albireo
+      { x: 0.15, y: 0.42, size: 2.1, color: '#ffffff', flare: false },
+      { x: 0.85, y: 0.42, size: 2.1, color: '#e0f2fe', flare: false }
+    ],
+    edges: [
+      [0, 1], [1, 2], [3, 1], [1, 4]
+    ]
+  },
+  {
+    // Crux (Salib Selatan / Pari)
+    stars: [
+      { x: 0.50, y: 0.12, size: 2.4, color: '#fef08a', flare: false },
+      { x: 0.50, y: 0.88, size: 2.9, color: '#bae6fd', flare: true }, // Acrux
+      { x: 0.18, y: 0.48, size: 2.6, color: '#e0f2fe', flare: true }, // Mimosa
+      { x: 0.82, y: 0.46, size: 2.1, color: '#ffffff', flare: false },
+      { x: 0.65, y: 0.62, size: 1.5, color: '#e2e8f0', flare: false }
+    ],
+    edges: [
+      [0, 1], [2, 3], [1, 4]
+    ]
+  },
+  {
+    // Lyra (Vega)
+    stars: [
+      { x: 0.35, y: 0.10, size: 3.2, color: '#e0f2fe', flare: true }, // Vega
+      { x: 0.62, y: 0.22, size: 1.8, color: '#ffffff', flare: false },
+      { x: 0.44, y: 0.48, size: 1.9, color: '#e2e8f0', flare: false },
+      { x: 0.32, y: 0.85, size: 2.1, color: '#fef3c7', flare: false },
+      { x: 0.68, y: 0.88, size: 2.2, color: '#ffffff', flare: false },
+      { x: 0.78, y: 0.50, size: 1.8, color: '#e2e8f0', flare: false }
+    ],
+    edges: [
+      [0, 1], [0, 2], [2, 3], [3, 4], [4, 5], [5, 2]
+    ]
+  },
+  {
+    // Canis Major (Sirius - Bintang paling terang di langit malam)
+    stars: [
+      { x: 0.35, y: 0.25, size: 3.5, color: '#bae6fd', flare: true }, // Sirius
+      { x: 0.12, y: 0.35, size: 2.3, color: '#e0f2fe', flare: false },
+      { x: 0.48, y: 0.15, size: 1.7, color: '#ffffff', flare: false },
+      { x: 0.62, y: 0.62, size: 2.5, color: '#fef08a', flare: true },
+      { x: 0.45, y: 0.85, size: 2.7, color: '#e0f2fe', flare: true },
+      { x: 0.85, y: 0.80, size: 2.1, color: '#ffffff', flare: false }
+    ],
+    edges: [
+      [1, 0], [0, 2], [0, 3], [3, 4], [3, 5]
+    ]
+  },
+  {
+    // Taurus (Aldebaran)
+    stars: [
+      { x: 0.35, y: 0.55, size: 3.1, color: '#f59e0b', flare: true }, // Aldebaran
+      { x: 0.85, y: 0.15, size: 2.5, color: '#e0f2fe', flare: true },
+      { x: 0.88, y: 0.60, size: 2.2, color: '#ffffff', flare: false },
+      { x: 0.28, y: 0.40, size: 2.0, color: '#fef3c7', flare: false },
+      { x: 0.18, y: 0.65, size: 1.8, color: '#e2e8f0', flare: false }
+    ],
+    edges: [
+      [4, 0], [0, 3], [3, 1], [0, 2]
+    ]
+  },
+  {
+    // Pleiades (Bintang Kartika cluster)
+    stars: [
+      { x: 0.50, y: 0.45, size: 2.7, color: '#bae6fd', flare: true },
+      { x: 0.72, y: 0.62, size: 2.3, color: '#e0f2fe', flare: false },
+      { x: 0.28, y: 0.35, size: 2.4, color: '#e0f2fe', flare: false },
+      { x: 0.38, y: 0.22, size: 2.1, color: '#ffffff', flare: false },
+      { x: 0.35, y: 0.60, size: 2.0, color: '#bae6fd', flare: false },
+      { x: 0.20, y: 0.18, size: 1.9, color: '#ffffff', flare: false },
+      { x: 0.76, y: 0.52, size: 1.8, color: '#e0f2fe', flare: false }
+    ],
+    edges: [
+      [1, 6], [6, 0], [0, 4], [0, 3], [3, 5], [3, 2], [2, 4]
+    ]
+  },
+  {
+    // Gemini (Castor & Pollux)
+    stars: [
+      { x: 0.30, y: 0.12, size: 2.8, color: '#ffffff', flare: true }, // Castor
+      { x: 0.55, y: 0.15, size: 3.0, color: '#f59e0b', flare: true }, // Pollux
+      { x: 0.42, y: 0.48, size: 2.1, color: '#fef08a', flare: false },
+      { x: 0.20, y: 0.52, size: 2.0, color: '#ffffff', flare: false },
+      { x: 0.25, y: 0.78, size: 1.9, color: '#e2e8f0', flare: false },
+      { x: 0.58, y: 0.85, size: 2.6, color: '#e0f2fe', flare: true }
+    ],
+    edges: [
+      [0, 1], [0, 3], [1, 2], [3, 4], [2, 5]
+    ]
+  },
+  {
+    // Scorpius (Antares)
+    stars: [
+      { x: 0.45, y: 0.35, size: 3.2, color: '#ef4444', flare: true }, // Antares
+      { x: 0.22, y: 0.15, size: 2.2, color: '#ffffff', flare: false },
+      { x: 0.32, y: 0.20, size: 2.4, color: '#e0f2fe', flare: false },
+      { x: 0.20, y: 0.30, size: 1.9, color: '#ffffff', flare: false },
+      { x: 0.55, y: 0.68, size: 2.4, color: '#fef08a', flare: false },
+      { x: 0.85, y: 0.82, size: 2.8, color: '#bae6fd', flare: true }, // Shaula
+      { x: 0.80, y: 0.74, size: 2.1, color: '#ffffff', flare: false }
+    ],
+    edges: [
+      [1, 2], [2, 3], [2, 0], [0, 4], [4, 6], [6, 5]
+    ]
+  },
+  {
+    // Aquila (Altair)
+    stars: [
+      { x: 0.50, y: 0.45, size: 3.1, color: '#ffffff', flare: true }, // Altair
+      { x: 0.42, y: 0.25, size: 2.3, color: '#f59e0b', flare: false },
+      { x: 0.58, y: 0.65, size: 2.1, color: '#fef3c7', flare: false },
+      { x: 0.20, y: 0.50, size: 2.0, color: '#e0f2fe', flare: false },
+      { x: 0.80, y: 0.48, size: 2.0, color: '#ffffff', flare: false }
+    ],
+    edges: [
+      [1, 0], [0, 2], [3, 0], [0, 4]
+    ]
+  },
+  {
+    // Leo (Regulus)
+    stars: [
+      { x: 0.25, y: 0.75, size: 3.1, color: '#bae6fd', flare: true }, // Regulus
+      { x: 0.40, y: 0.40, size: 2.5, color: '#fef08a', flare: true },
+      { x: 0.48, y: 0.25, size: 2.0, color: '#ffffff', flare: false },
+      { x: 0.32, y: 0.15, size: 1.8, color: '#e2e8f0', flare: false },
+      { x: 0.75, y: 0.35, size: 2.3, color: '#ffffff', flare: false },
+      { x: 0.70, y: 0.65, size: 2.1, color: '#e2e8f0', flare: false },
+      { x: 0.92, y: 0.45, size: 2.7, color: '#e0f2fe', flare: true }
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3], [1, 4], [4, 5], [5, 0], [4, 6]
+    ]
+  },
+  {
+    // Pegasus (The Great Square)
+    stars: [
+      { x: 0.20, y: 0.75, size: 2.4, color: '#ffffff', flare: false },
+      { x: 0.22, y: 0.22, size: 2.6, color: '#f59e0b', flare: true },
+      { x: 0.80, y: 0.20, size: 2.7, color: '#bae6fd', flare: true },
+      { x: 0.78, y: 0.72, size: 2.3, color: '#e0f2fe', flare: false },
+      { x: 0.05, y: 0.90, size: 2.4, color: '#fef08a', flare: false }
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3], [3, 0], [0, 4]
+    ]
+  },
+  {
+    // Corona Borealis (Mahkota)
+    stars: [
+      { x: 0.50, y: 0.65, size: 2.8, color: '#ffffff', flare: true }, // Alphecca
+      { x: 0.30, y: 0.55, size: 2.1, color: '#fef08a', flare: false },
+      { x: 0.18, y: 0.35, size: 1.9, color: '#e0f2fe', flare: false },
+      { x: 0.70, y: 0.55, size: 2.0, color: '#ffffff', flare: false },
+      { x: 0.82, y: 0.35, size: 1.8, color: '#e2e8f0', flare: false }
+    ],
+    edges: [
+      [2, 1], [1, 0], [0, 3], [3, 4]
+    ]
+  },
+  {
+    // Bootes (Arcturus)
+    stars: [
+      { x: 0.45, y: 0.85, size: 3.4, color: '#f59e0b', flare: true }, // Arcturus
+      { x: 0.20, y: 0.78, size: 2.2, color: '#ffffff', flare: false },
+      { x: 0.58, y: 0.52, size: 2.4, color: '#fef08a', flare: true },
+      { x: 0.30, y: 0.25, size: 2.1, color: '#e0f2fe', flare: false },
+      { x: 0.65, y: 0.15, size: 2.0, color: '#fef3c7', flare: false }
+    ],
+    edges: [
+      [1, 0], [0, 2], [2, 3], [3, 4], [4, 2]
+    ]
+  },
+  {
+    // Centaurus (Alpha Centauri)
+    stars: [
+      { x: 0.20, y: 0.75, size: 3.3, color: '#fef08a', flare: true }, // Rigil Kent
+      { x: 0.45, y: 0.72, size: 3.0, color: '#bae6fd', flare: true }, // Hadar
+      { x: 0.50, y: 0.20, size: 2.3, color: '#f59e0b', flare: false },
+      { x: 0.75, y: 0.45, size: 2.1, color: '#ffffff', flare: false }
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3]
+    ]
+  }
+];
+
 export default function JourneyGridBackground() {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -33,7 +252,6 @@ export default function JourneyGridBackground() {
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    // Detect reduced motion preference
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches;
@@ -44,51 +262,139 @@ export default function JourneyGridBackground() {
     let height = 0;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    // Responsive grid parameters: wide, spacious rhombuses with reduced line density
-    const getGridConfig = () => {
-      const w = window.innerWidth;
-      const isMobile = w < 640;
-      const isTablet = w < 1024;
-      return {
-        cellSize: isMobile ? 120 : isTablet ? 155 : 190,
-        lerpFactor: prefersReducedMotion ? 1 : 0.16
-      };
-    };
-
-    let config = getGridConfig();
-
-    // Mouse coordinates: target and smoothed (lerped) values
     const mouse = {
-      targetX: 0,
-      targetY: 0,
-      currentX: 0,
-      currentY: 0,
+      targetX: -9999,
+      targetY: -9999,
+      currentX: -9999,
+      currentY: -9999,
       targetIntensity: 0,
       currentIntensity: 0,
-      isInside: false,
-      hasInteracted: false
+      isInside: false
     };
 
-    // Tracks per-edge activation state for smooth transition between rhombuses
-    const activeEdgeAlphas = new Map();
-
-    // Intro weave animation state: Top-Left -> Bottom-Right (\), then Top-Right -> Bottom-Left (/)
-    let introTime = 0;
-    let isIntroComplete = prefersReducedMotion;
-
-    // Stardust embers: subtle floating ambient granules tying into the portfolio's About theme
-    const emberCount = 22;
+    const emberCount = 30;
     let embers = [];
 
     const initEmbers = (w, h) => {
       embers = Array.from({ length: emberCount }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        size: Math.random() * 1.4 + 0.7,
+        size: Math.random() * 1.3 + 0.7,
         speedY: Math.random() * 0.18 + 0.06,
         driftX: (Math.random() - 0.5) * 0.08,
-        baseAlpha: Math.random() * 0.25 + 0.15,
+        baseAlpha: Math.random() * 0.25 + 0.12,
         phase: Math.random() * Math.PI * 2
+      }));
+    };
+
+    let activeConstellations = [];
+    let fieldStars = [];
+
+    const setupStarMap = (w, h) => {
+      const isMobile = w < 640;
+      const isTablet = w < 1024;
+
+      let layoutSpecs;
+
+      if (isMobile) {
+        layoutSpecs = [
+          { tIdx: 2,  cx: 0.26, cy: 0.05, rot: -0.45, scale: 0.90 }, // Cassiopeia
+          { tIdx: 5,  cx: 0.74, cy: 0.12, rot: 0.35,  scale: 0.85 }, // Lyra
+          { tIdx: 8,  cx: 0.38, cy: 0.22, rot: -0.25, scale: 0.80 }, // Pleiades
+          { tIdx: 3,  cx: 0.78, cy: 0.33, rot: 0.52,  scale: 0.95 }, // Cygnus
+          { tIdx: 1,  cx: 0.24, cy: 0.44, rot: 0.38,  scale: 1.00 }, // Ursa Major
+          { tIdx: 0,  cx: 0.70, cy: 0.57, rot: -0.32, scale: 1.05 }, // Orion
+          { tIdx: 7,  cx: 0.28, cy: 0.69, rot: 0.48,  scale: 0.92 }, // Taurus
+          { tIdx: 9,  cx: 0.76, cy: 0.81, rot: -0.40, scale: 0.95 }, // Gemini
+          { tIdx: 4,  cx: 0.35, cy: 0.92, rot: 0.28,  scale: 0.88 }  // Crux
+        ];
+      } else if (isTablet) {
+        layoutSpecs = [
+          { tIdx: 2,  cx: 0.18, cy: 0.09, rot: -0.52, scale: 0.95 }, // Cassiopeia
+          { tIdx: 14, cx: 0.48, cy: 0.06, rot: 0.25,  scale: 0.80 }, // Corona Borealis
+          { tIdx: 3,  cx: 0.82, cy: 0.11, rot: 0.48,  scale: 1.00 }, // Cygnus
+          { tIdx: 8,  cx: 0.34, cy: 0.24, rot: -0.22, scale: 0.85 }, // Pleiades
+          { tIdx: 1,  cx: 0.12, cy: 0.36, rot: 0.42,  scale: 1.05 }, // Ursa Major
+          { tIdx: 9,  cx: 0.84, cy: 0.32, rot: -0.38, scale: 1.00 }, // Gemini
+          { tIdx: 0,  cx: 0.64, cy: 0.48, rot: -0.26, scale: 1.15 }, // Orion
+          { tIdx: 7,  cx: 0.16, cy: 0.58, rot: 0.34,  scale: 0.95 }, // Taurus
+          { tIdx: 12, cx: 0.38, cy: 0.72, rot: -0.42, scale: 1.00 }, // Leo
+          { tIdx: 10, cx: 0.82, cy: 0.75, rot: 0.45,  scale: 1.10 }, // Scorpius
+          { tIdx: 4,  cx: 0.24, cy: 0.88, rot: 0.22,  scale: 0.90 }  // Crux
+        ];
+      } else {
+        layoutSpecs = [
+          { tIdx: 2,  cx: 0.21, cy: 0.08, rot: -0.62, scale: 0.95 }, // Cassiopeia
+          { tIdx: 14, cx: 0.46, cy: 0.05, rot: -0.22, scale: 0.80 }, // Corona Borealis
+          { tIdx: 5,  cx: 0.66, cy: 0.11, rot: -0.45, scale: 0.92 }, // Lyra / Vega
+          { tIdx: 3,  cx: 0.86, cy: 0.13, rot: 0.58,  scale: 1.05 }, // Cygnus
+
+          { tIdx: 8,  cx: 0.36, cy: 0.21, rot: 0.28,  scale: 0.85 }, // Pleiades cluster
+          { tIdx: 1,  cx: 0.14, cy: 0.30, rot: 0.36,  scale: 1.10 }, // Ursa Major / Biduk
+          { tIdx: 9,  cx: 0.79, cy: 0.33, rot: -0.50, scale: 1.05 }, // Gemini
+
+          { tIdx: 7,  cx: 0.09, cy: 0.51, rot: -0.32, scale: 0.98 }, // Taurus
+          { tIdx: 12, cx: 0.32, cy: 0.44, rot: 0.42,  scale: 1.05 }, // Leo
+          { tIdx: 0,  cx: 0.58, cy: 0.48, rot: -0.24, scale: 1.20 }, // Orion
+          { tIdx: 11, cx: 0.91, cy: 0.52, rot: -0.65, scale: 0.95 }, // Aquila / Altair
+
+          { tIdx: 6,  cx: 0.11, cy: 0.73, rot: 0.62,  scale: 1.10 }, // Canis Major / Sirius
+          { tIdx: 4,  cx: 0.34, cy: 0.82, rot: 0.30,  scale: 0.90 }, // Crux
+          { tIdx: 15, cx: 0.56, cy: 0.80, rot: -0.38, scale: 1.05 }, // Bootes / Arcturus
+          { tIdx: 10, cx: 0.83, cy: 0.76, rot: 0.46,  scale: 1.15 }  // Scorpius / Antares
+        ];
+      }
+
+      const baseW = Math.min(w * 0.22, 240);
+      const baseH = Math.min(h * 0.22, 190);
+
+      activeConstellations = layoutSpecs.map((spec, cIdx) => {
+        const template = CONSTELLATIONS[spec.tIdx];
+        const cos = Math.cos(spec.rot);
+        const sin = Math.sin(spec.rot);
+        const centerX = spec.cx * w;
+        const centerY = spec.cy * h;
+
+        const stars = template.stars.map((s, sIdx) => {
+          const dx = (s.x - 0.5) * baseW * spec.scale;
+          const dy = (s.y - 0.5) * baseH * spec.scale;
+
+          const rx = dx * cos - dy * sin;
+          const ry = dx * sin + dy * cos;
+
+          return {
+            id: `c_${cIdx}_${sIdx}`,
+            x: centerX + rx,
+            y: centerY + ry,
+            radius: s.size * (0.85 + spec.scale * 0.15),
+            color: s.color,
+            flare: s.flare,
+            twinklePhase: Math.random() * Math.PI * 2,
+            twinkleSpeed: Math.random() * 1.8 + 1.2
+          };
+        });
+
+        return {
+          stars,
+          edges: template.edges
+        };
+      });
+
+      const fieldCount = isMobile ? 65 : 130;
+      fieldStars = Array.from({ length: fieldCount }, (_, i) => ({
+        id: `f_${i}`,
+        x: Math.random() * w,
+        y: Math.random() * h,
+        radius: Math.random() * 1.3 + 0.6,
+        color:
+          Math.random() > 0.45
+            ? '#ffffff'
+            : Math.random() > 0.5
+            ? '#fef3c7'
+            : '#bae6fd',
+        flare: Math.random() < 0.03,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: Math.random() * 2.2 + 0.8
       }));
     };
 
@@ -107,15 +413,8 @@ export default function JourneyGridBackground() {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
 
-      config = getGridConfig();
       initEmbers(width, height);
-
-      if (!mouse.hasInteracted) {
-        mouse.targetX = width / 2;
-        mouse.targetY = height * 0.4;
-        mouse.currentX = width / 2;
-        mouse.currentY = height * 0.4;
-      }
+      setupStarMap(width, height);
     };
 
     handleResize();
@@ -125,7 +424,6 @@ export default function JourneyGridBackground() {
     });
     resizeObserver.observe(container);
 
-    // Track pointer globally so hovering over cards continues to smoothly interact
     const updatePointerPosition = (clientX, clientY) => {
       if (!container || !isVisible) return;
       const rect = container.getBoundingClientRect();
@@ -133,35 +431,26 @@ export default function JourneyGridBackground() {
       const inY = clientY >= rect.top && clientY <= rect.bottom;
 
       if (inX && inY) {
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-
-        mouse.targetX = x;
-        mouse.targetY = y;
+        mouse.targetX = clientX - rect.left;
+        mouse.targetY = clientY - rect.top;
         mouse.targetIntensity = 1;
         mouse.isInside = true;
-        mouse.hasInteracted = true;
       } else {
         mouse.targetIntensity = 0;
         mouse.isInside = false;
       }
     };
 
-    const handlePointerMove = (e) => {
-      updatePointerPosition(e.clientX, e.clientY);
-    };
-
+    const handlePointerMove = (e) => updatePointerPosition(e.clientX, e.clientY);
     const handleDocumentLeave = () => {
       mouse.targetIntensity = 0;
       mouse.isInside = false;
     };
-
     const handleTouchMove = (e) => {
       if (e.touches && e.touches[0]) {
         updatePointerPosition(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
-
     const handleTouchEnd = () => {
       mouse.targetIntensity = 0;
       mouse.isInside = false;
@@ -172,9 +461,9 @@ export default function JourneyGridBackground() {
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-    // IntersectionObserver to pause rendering loop when section is off-screen
     let lastTime = performance.now();
-    let ambientTime = 0;
+    let time = 0;
+    let introProgress = prefersReducedMotion ? 1 : 0;
 
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -198,45 +487,35 @@ export default function JourneyGridBackground() {
 
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
-      ambientTime += delta;
+      time += delta;
 
-      if (!isIntroComplete) {
-        introTime += delta;
-        if (introTime >= 2.4) {
-          isIntroComplete = true;
-        }
+      if (introProgress < 1) {
+        introProgress = Math.min(1, introProgress + delta * 0.9);
       }
 
-      // Frame-rate independent lerp using delta time for rock-solid 60/120fps smoothness
-      const smoothFactor = prefersReducedMotion
-        ? 1
-        : 1 - Math.pow(Math.max(0, 1 - config.lerpFactor), delta * 60);
-
-      mouse.currentX += (mouse.targetX - mouse.currentX) * smoothFactor;
-      mouse.currentY += (mouse.targetY - mouse.currentY) * smoothFactor;
+      const lerpFactor = prefersReducedMotion ? 1 : Math.min(1, delta * 8.5);
+      if (mouse.targetX > -9000) {
+        if (mouse.currentX < -9000) {
+          mouse.currentX = mouse.targetX;
+          mouse.currentY = mouse.targetY;
+        } else {
+          mouse.currentX += (mouse.targetX - mouse.currentX) * lerpFactor;
+          mouse.currentY += (mouse.targetY - mouse.currentY) * lerpFactor;
+        }
+      }
       mouse.currentIntensity +=
-        (mouse.targetIntensity - mouse.currentIntensity) * (smoothFactor * 0.9);
+        (mouse.targetIntensity - mouse.currentIntensity) * lerpFactor;
 
       ctx.clearRect(0, 0, width, height);
 
-      const { cellSize } = config;
-      const effectiveIntensity = Math.max(0, mouse.currentIntensity);
       const mx = mouse.currentX;
       const my = mouse.currentY;
+      const mIntensity = Math.max(0, mouse.currentIntensity);
 
-      // Subtle ambient pulsation when idle
-      const idleLineAlpha = prefersReducedMotion
-        ? 0.30
-        : 0.30 + Math.sin(ambientTime * 0.6) * 0.04;
-
-      // -------------------------------------------------------------
-      // Pass 0: CELESTIAL STARDUST PARTICLES (Under the grid)
-      // Delicate ambient warmth that echoes the portfolio's About hero
-      // -------------------------------------------------------------
       if (!prefersReducedMotion && embers.length > 0) {
         embers.forEach((emb) => {
           emb.y -= emb.speedY;
-          emb.x += emb.driftX + Math.sin(ambientTime * 0.8 + emb.phase) * 0.08;
+          emb.x += emb.driftX + Math.sin(time * 0.8 + emb.phase) * 0.1;
 
           if (emb.y < -10) {
             emb.y = height + 10;
@@ -245,271 +524,98 @@ export default function JourneyGridBackground() {
           if (emb.x < -10) emb.x = width + 10;
           if (emb.x > width + 10) emb.x = -10;
 
-          const alpha = emb.baseAlpha + Math.sin(ambientTime + emb.phase) * 0.08;
+          const alpha = emb.baseAlpha + Math.sin(time + emb.phase) * 0.06;
           ctx.beginPath();
           ctx.arc(emb.x, emb.y, emb.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(235, 185, 110, ${Math.max(0.05, alpha)})`;
+          ctx.fillStyle = `rgba(235, 185, 110, ${Math.max(0.04, alpha)})`;
           ctx.fill();
         });
       }
 
-      // -------------------------------------------------------------
-      // Pass 1 & 2: ARCHITECTURAL RHOMBUS LATTICE WITH MAGNETIC SEPARATION
-      // When cursor is inside a rhombus, its boundary lines separate
-      // from the rhombus corners and swivel to point directly at the cursor!
-      // In idle, all lines form a seamless, resting diagonal coordinate grid.
-      // -------------------------------------------------------------
-      const halfS = cellSize / 2;
-      const L = cellSize / Math.SQRT2; // Resting length of each rhombus edge
+      activeConstellations.forEach((c) => {
+        const { stars, edges } = c;
 
-      const numCols = Math.ceil(width / halfS) + 8;
-      const numRows = Math.ceil(height / halfS) + 8;
-      const offsetX = ((width % cellSize) / 2) - cellSize * 3;
-      const offsetY = ((height % cellSize) / 2) - cellSize * 3;
+        edges.forEach(([i1, i2]) => {
+          const s1 = stars[i1];
+          const s2 = stars[i2];
+          if (!s1 || !s2) return;
 
-      // Intro wave parameters: Top-Left -> Bottom-Right (\), then Top-Right -> Bottom-Left (/)
-      const w1Raw = Math.max(0, Math.min(1, (introTime - 0.15) / 1.05));
-      const wave1 = w1Raw < 0.5 ? 2 * w1Raw * w1Raw : 1 - Math.pow(-2 * w1Raw + 2, 2) / 2;
+          const midX = (s1.x + s2.x) / 2;
+          const midY = (s1.y + s2.y) / 2;
+          const distToCursor = Math.hypot(mx - midX, my - midY);
+          const cursorGlow =
+            mIntensity > 0.05
+              ? Math.max(0, 1 - distToCursor / 160) * mIntensity
+              : 0;
 
-      const w2Raw = Math.max(0, Math.min(1, (introTime - 0.85) / 1.05));
-      const wave2 = w2Raw < 0.5 ? 2 * w2Raw * w2Raw : 1 - Math.pow(-2 * w2Raw + 2, 2) / 2;
+          const lineAlpha = (0.32 + cursorGlow * 0.48) * introProgress;
+          const bloomAlpha = (0.09 + cursorGlow * 0.24) * introProgress;
 
-      const minCoord = -cellSize * 3;
-      const maxCoord = width + height + cellSize * 3;
-      const coordRange = maxCoord - minCoord;
-      const waveSpan = 0.14;
+          ctx.beginPath();
+          ctx.moveTo(s1.x, s1.y);
+          ctx.lineTo(s2.x, s2.y);
+          ctx.lineWidth = 2.4 + cursorGlow * 1.6;
+          ctx.strokeStyle = `rgba(229, 173, 104, ${bloomAlpha})`;
+          ctx.stroke();
 
-      // Identify the exact rhombus containing the cursor position (only after intro completes)
-      const activeKeys = new Set();
-      if (isIntroComplete && effectiveIntensity > 0.01 && mouse.isInside) {
-        const X = mx - offsetX;
-        const Y = my - offsetY;
-        const ku = Math.floor((Y + X) / cellSize);
-        const kv = Math.floor((Y - X) / cellSize);
+          ctx.beginPath();
+          ctx.moveTo(s1.x, s1.y);
+          ctx.lineTo(s2.x, s2.y);
+          ctx.lineWidth = 0.9 + cursorGlow * 0.5;
+          ctx.strokeStyle = `rgba(255, 238, 190, ${lineAlpha})`;
+          ctx.stroke();
+        });
+      });
 
-        const c0 = ku - kv;
-        const r0 = ku + kv;
+      const allStarsToRender = [
+        ...fieldStars,
+        ...activeConstellations.flatMap((c) => c.stars)
+      ];
 
-        // The exact 4 boundary edges of the rhombus containing the cursor
-        const k1 = `1_${c0}_${r0}`;
-        const k2 = `2_${c0}_${r0}`;
-        const k3 = `1_${c0 - 1}_${r0 + 1}`;
-        const k4 = `2_${c0 + 1}_${r0 + 1}`;
+      allStarsToRender.forEach((s) => {
+        const twinkle = prefersReducedMotion
+          ? 1
+          : 0.85 + Math.sin(time * s.twinkleSpeed + s.twinklePhase) * 0.15;
 
-        activeKeys.add(k1);
-        activeKeys.add(k2);
-        activeKeys.add(k3);
-        activeKeys.add(k4);
+        const distToCursor = Math.hypot(mx - s.x, my - s.y);
+        const cursorBoost =
+          mIntensity > 0.05
+            ? Math.max(0, 1 - distToCursor / 150) * 0.45 * mIntensity
+            : 0;
 
-        if (!activeEdgeAlphas.has(k1)) activeEdgeAlphas.set(k1, 0);
-        if (!activeEdgeAlphas.has(k2)) activeEdgeAlphas.set(k2, 0);
-        if (!activeEdgeAlphas.has(k3)) activeEdgeAlphas.set(k3, 0);
-        if (!activeEdgeAlphas.has(k4)) activeEdgeAlphas.set(k4, 0);
-      }
+        const effectiveAlpha = Math.min(1, (twinkle + cursorBoost) * introProgress);
+        const effectiveRadius = s.radius * (1 + cursorBoost * 0.3);
 
-      // Delta-time smoothed transition for edge activations (fluid 60/120fps motion)
-      const edgeSpeed = prefersReducedMotion ? 1 : Math.min(1, delta * 14);
-      for (const [key, currentVal] of activeEdgeAlphas.entries()) {
-        const target = activeKeys.has(key) ? effectiveIntensity : 0;
-        const nextVal = currentVal + (target - currentVal) * edgeSpeed;
-        if (nextVal < 0.005 && target === 0) {
-          activeEdgeAlphas.delete(key);
+        if (s.flare && effectiveAlpha > 0.35) {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, effectiveRadius * 3.0, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(229, 173, 104, ${0.12 * effectiveAlpha})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, effectiveRadius * 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 245, 215, ${0.22 * effectiveAlpha})`;
+          ctx.fill();
         } else {
-          activeEdgeAlphas.set(key, nextVal);
-        }
-      }
-
-      const gridPath = new Path2D();
-      const activeEdges = [];
-      const introDrawingPath = new Path2D();
-      const sparks = [];
-
-      for (let r = -4; r <= numRows; r++) {
-        for (let c = -4; c <= numCols; c++) {
-          if (Math.abs(c + r) % 2 === 0) {
-            const ax = c * halfS + offsetX;
-            const ay = r * halfS + offsetY;
-
-            // --- Outgoing Edge 1: Family 1 (\, down-right) ---
-            const b1x = (c + 1) * halfS + offsetX;
-            const b1y = (r + 1) * halfS + offsetY;
-
-            let p1 = 1;
-            if (!isIntroComplete) {
-              const m1x = (ax + b1x) / 2;
-              const m1y = (ay + b1y) / 2;
-              const norm1 = (m1x + m1y - minCoord) / coordRange;
-              if (wave1 <= norm1 - waveSpan) {
-                p1 = 0;
-              } else if (wave1 >= norm1 + waveSpan) {
-                p1 = 1;
-              } else {
-                p1 = (wave1 - (norm1 - waveSpan)) / (2 * waveSpan);
-              }
-            }
-
-            if (p1 >= 1) {
-              const key1 = `1_${c}_${r}`;
-              const alpha1 = isIntroComplete ? (activeEdgeAlphas.get(key1) || 0) : 0;
-
-              if (alpha1 >= 0.01 && !prefersReducedMotion) {
-                const m1x = (ax + b1x) / 2;
-                const m1y = (ay + b1y) / 2;
-                activeEdges.push({
-                  ax, ay, bx: b1x, by: b1y,
-                  dx: mx - m1x, dy: my - m1y,
-                  dist: Math.hypot(mx - m1x, my - m1y),
-                  alpha: alpha1
-                });
-              } else {
-                gridPath.moveTo(ax, ay);
-                gridPath.lineTo(b1x, b1y);
-              }
-            } else if (p1 > 0) {
-              const curBx = ax + (b1x - ax) * p1;
-              const curBy = ay + (b1y - ay) * p1;
-              introDrawingPath.moveTo(ax, ay);
-              introDrawingPath.lineTo(curBx, curBy);
-              const intensity1 = Math.sin(p1 * Math.PI);
-              if (intensity1 > 0.12) {
-                sparks.push({ x: curBx, y: curBy, intensity: intensity1 });
-              }
-            }
-
-            // --- Outgoing Edge 2: Family 2 (/, down-left) ---
-            const b2x = (c - 1) * halfS + offsetX;
-            const b2y = (r + 1) * halfS + offsetY;
-
-            let p2 = 1;
-            if (!isIntroComplete) {
-              const m2x = (ax + b2x) / 2;
-              const m2y = (ay + b2y) / 2;
-              const dist2 = (width - m2x) + m2y;
-              const norm2 = (dist2 - minCoord) / coordRange;
-              if (wave2 <= norm2 - waveSpan) {
-                p2 = 0;
-              } else if (wave2 >= norm2 + waveSpan) {
-                p2 = 1;
-              } else {
-                p2 = (wave2 - (norm2 - waveSpan)) / (2 * waveSpan);
-              }
-            }
-
-            if (p2 >= 1) {
-              const key2 = `2_${c}_${r}`;
-              const alpha2 = isIntroComplete ? (activeEdgeAlphas.get(key2) || 0) : 0;
-
-              if (alpha2 >= 0.01 && !prefersReducedMotion) {
-                const m2x = (ax + b2x) / 2;
-                const m2y = (ay + b2y) / 2;
-                activeEdges.push({
-                  ax, ay, bx: b2x, by: b2y,
-                  dx: mx - m2x, dy: my - m2y,
-                  dist: Math.hypot(mx - m2x, my - m2y),
-                  alpha: alpha2
-                });
-              } else {
-                gridPath.moveTo(ax, ay);
-                gridPath.lineTo(b2x, b2y);
-              }
-            } else if (p2 > 0) {
-              const curBx2 = ax + (b2x - ax) * p2;
-              const curBy2 = ay + (b2y - ay) * p2;
-              introDrawingPath.moveTo(ax, ay);
-              introDrawingPath.lineTo(curBx2, curBy2);
-              const intensity2 = Math.sin(p2 * Math.PI);
-              if (intensity2 > 0.12) {
-                sparks.push({ x: curBx2, y: curBy2, intensity: intensity2 });
-              }
-            }
-          }
-        }
-      }
-
-      // 1. Draw all resting grid lines in one clean batch
-      ctx.lineWidth = 1.15;
-      ctx.strokeStyle = `rgba(215, 165, 85, ${idleLineAlpha * 1.25})`;
-      ctx.stroke(gridPath);
-
-      // 2. Render intro weaving wave (actively drawing lines with luminous bloom & spark heads)
-      if (!isIntroComplete) {
-        // Luminous ambient bloom on advancing threads
-        ctx.beginPath();
-        ctx.lineWidth = 3.6;
-        ctx.strokeStyle = 'rgba(229, 173, 104, 0.35)';
-        ctx.stroke(introDrawingPath);
-
-        // Radiant golden needle core
-        ctx.beginPath();
-        ctx.lineWidth = 1.6;
-        ctx.strokeStyle = 'rgba(255, 238, 185, 0.90)';
-        ctx.stroke(introDrawingPath);
-
-        // Advancing celestial sparks at line tips
-        if (sparks.length > 0) {
-          for (let i = 0; i < sparks.length; i++) {
-            const sp = sparks[i];
-            ctx.beginPath();
-            ctx.arc(sp.x, sp.y, 1.8 * sp.intensity + 0.6, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 248, 225, ${0.95 * sp.intensity})`;
-            ctx.fill();
-          }
-        }
-      }
-
-      // 2. Render active lines that separate from the rhombus and point to the cursor
-      if (activeEdges.length > 0) {
-        for (let i = 0; i < activeEdges.length; i++) {
-          const edge = activeEdges[i];
-          const { ax, ay, bx, by, dx, dy, dist, alpha } = edge;
-
-          // Unit vector pointing toward cursor
-          const uX = dx / Math.max(dist, 0.001);
-          const uY = dy / Math.max(dist, 0.001);
-
-          // Target positions: inner tip points toward cursor, outer tip extends backwards
-          const clearance = 6; // Clean focal clearance around cursor
-          const targetInnerX = mx - uX * clearance;
-          const targetInnerY = my - uY * clearance;
-          const targetOuterX = targetInnerX - uX * L;
-          const targetOuterY = targetInnerY - uY * L;
-
-          // Determine which resting vertex was closer to the cursor
-          const distA = Math.hypot(ax - mx, ay - my);
-          const distB = Math.hypot(bx - mx, by - my);
-
-          let curAx, curAy, curBx, curBy;
-
-          if (distB < distA) {
-            curAx = (1 - alpha) * ax + alpha * targetOuterX;
-            curAy = (1 - alpha) * ay + alpha * targetOuterY;
-            curBx = (1 - alpha) * bx + alpha * targetInnerX;
-            curBy = (1 - alpha) * by + alpha * targetInnerY;
-          } else {
-            curAx = (1 - alpha) * ax + alpha * targetInnerX;
-            curAy = (1 - alpha) * ay + alpha * targetInnerY;
-            curBx = (1 - alpha) * bx + alpha * targetOuterX;
-            curBy = (1 - alpha) * by + alpha * targetOuterY;
-          }
-
-          // Ambient luminous bloom stroke
           ctx.beginPath();
-          ctx.moveTo(curAx, curAy);
-          ctx.lineTo(curBx, curBy);
-          ctx.lineCap = 'round';
-          ctx.lineWidth = 3.6 * alpha + 1.0;
-          ctx.strokeStyle = `rgba(229, 173, 104, ${0.30 * alpha})`;
-          ctx.stroke();
-
-          // Radiant golden pointer core
-          ctx.beginPath();
-          ctx.moveTo(curAx, curAy);
-          ctx.lineTo(curBx, curBy);
-          ctx.lineCap = 'round';
-          ctx.lineWidth = 1.5 + 0.8 * alpha;
-          ctx.strokeStyle = `rgba(255, 235, 175, ${0.5 + 0.5 * alpha})`;
-          ctx.stroke();
+          ctx.arc(s.x, s.y, effectiveRadius * 2.0, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(229, 173, 104, ${0.14 * effectiveAlpha})`;
+          ctx.fill();
         }
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, effectiveRadius, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = effectiveAlpha;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      if (mIntensity > 0.01 && mouse.isInside && mx > 0 && my > 0) {
+        ctx.beginPath();
+        ctx.arc(mx, my, 18, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(229, 173, 104, ${0.04 * mIntensity})`;
+        ctx.fill();
       }
 
       animId = requestAnimationFrame(render);
@@ -534,30 +640,35 @@ export default function JourneyGridBackground() {
       className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
       aria-hidden="true"
     >
-      {/* Layer 1: Deep obsidian base */}
       <div className="absolute inset-0 bg-[#06080d] pointer-events-none" />
 
-      {/* Layer 2: Top celestial warm amber nebula glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 75% 55% at 50% 0%, rgba(229, 173, 104, 0.16) 0%, rgba(185, 115, 45, 0.05) 50%, transparent 80%)',
-          filter: 'blur(30px)'
+            'radial-gradient(ellipse 75% 55% at 50% 0%, rgba(229, 173, 104, 0.15) 0%, rgba(185, 115, 45, 0.05) 50%, transparent 80%)',
+          filter: 'blur(34px)'
         }}
       />
 
-      {/* Layer 3: Bottom-right warm cosmic bronze aura */}
       <div
         className="absolute bottom-0 right-0 w-[700px] h-[450px] pointer-events-none"
         style={{
           background:
             'radial-gradient(circle 450px at 85% 85%, rgba(195, 135, 65, 0.08) 0%, transparent 70%)',
-          filter: 'blur(40px)'
+          filter: 'blur(44px)'
         }}
       />
 
-      {/* Layer 4: Cinematic edge vignette */}
+      <div
+        className="absolute top-1/4 left-0 w-[500px] h-[400px] pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle 350px at 15% 30%, rgba(45, 60, 110, 0.10) 0%, transparent 70%)',
+          filter: 'blur(48px)'
+        }}
+      />
+
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -566,13 +677,11 @@ export default function JourneyGridBackground() {
         }}
       />
 
-      {/* Dynamic Interactive Rhombus Separation Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 block w-full h-full pointer-events-none"
       />
 
-      {/* Seamless bottom gradient fade into the subsequent Projects section */}
       <div
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
         style={{

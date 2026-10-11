@@ -34,10 +34,9 @@ export default function BubbleButton({
     const width = 680;
     const height = 480;
 
-    // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-    camera.position.set(0, 0, 4.3); // Jarak ideal agar cincin leluasa vertikal dan tidak terpotong di batas atas
+    camera.position.set(0, 0, 4.3);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -50,7 +49,6 @@ export default function BubbleButton({
     renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
 
-    // Responsive Resize Observer agar selalu pas di semua ukuran layar
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth || width;
@@ -67,14 +65,11 @@ export default function BubbleButton({
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(container);
 
-    // Group Utama Planet (Menyatukan gelembung, rim, dan cincin)
     const planetGroup = new THREE.Group();
     scene.add(planetGroup);
 
-    // 2. Geometri Gelembung Planet dengan Pemetaan Frontal
     const bubbleGeo = new THREE.SphereGeometry(1.0, 64, 64);
     
-    // Remap UV agar seluruh gambar tampil utuh di lingkaran depan gelembung
     const uvs = bubbleGeo.attributes.uv;
     const positions = bubbleGeo.attributes.position;
     for (let i = 0; i < positions.count; i++) {
@@ -86,20 +81,19 @@ export default function BubbleButton({
     }
     uvs.needsUpdate = true;
 
-    // Simpan posisi awal vertex untuk efek getaran cairan
     const posAttr = bubbleGeo.attributes.position;
     const originalPositions = new Float32Array(posAttr.array.length);
     originalPositions.set(posAttr.array);
 
     const bubbleMat = new THREE.MeshPhysicalMaterial({
-      roughness: 0.20,              // Efek buram frosted glass lembut
+      roughness: 0.20,
       metalness: 0.05,
-      clearcoat: 1.0,               // Lapisan kilap kaca luar
+      clearcoat: 1.0,
       clearcoatRoughness: 0.03,
-      color: new THREE.Color('#fff4e0'), // Tint hangat keemasan
+      color: new THREE.Color('#fff4e0'),
       specularColor: new THREE.Color('#ffffff'),
       specularIntensity: 1.3,
-      iridescence: 0.85,            // Kilauan sabun tipis
+      iridescence: 0.85,
       iridescenceIOR: 1.33,
       side: THREE.FrontSide
     });
@@ -107,7 +101,6 @@ export default function BubbleButton({
     const bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
     planetGroup.add(bubble);
 
-    // 3. Texture Loader untuk Gambar dengan Auto-Fallback
     let currentTexture = null;
     const textureLoader = new THREE.TextureLoader();
     const applyTexture = (tex) => {
@@ -133,7 +126,6 @@ export default function BubbleButton({
       }
     );
 
-    // 4. Golden Rim Glow Shader (Lingkar emas sesuai gambar referensi)
     const rimGeo = new THREE.SphereGeometry(1.015, 64, 64);
     const rimMat = new THREE.ShaderMaterial({
       vertexShader: `
@@ -169,7 +161,6 @@ export default function BubbleButton({
     const rimMesh = new THREE.Mesh(rimGeo, rimMat);
     planetGroup.add(rimMesh);
 
-    // 5. CINCIN PLANET KOSMIK KEEMASAN (Planetary Ring ala Saturnus)
     const ringGeo = new THREE.RingGeometry(1.22, 1.85, 80);
     const ringMat = new THREE.ShaderMaterial({
       vertexShader: `
@@ -192,17 +183,11 @@ export default function BubbleButton({
           
           float t = (r - inner) / (outer - inner);
           
-          // Garis-garis partikel cincin kosmik (concentric dust grooves)
           float grooves = sin(t * 38.0) * 0.18 + 0.82;
-          
-          // Celah pembagi cincin (Cassini division gap)
           float cassini = smoothstep(0.02, 0.07, abs(t - 0.52));
-          
-          // Gradasi transparansi dari tepi dalam ke tepi luar
           float edgeFade = smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.82, 1.0, t));
           float alpha = edgeFade * grooves * cassini * 0.85;
           
-          // Warna gradasi cincin emas kosmik: Bronze -> Amber -> Champagne Gold
           vec3 deepBronze = vec3(0.65, 0.35, 0.10);
           vec3 brightGold = vec3(1.0, 0.84, 0.40);
           vec3 ringColor = mix(deepBronze, brightGold, t);
@@ -217,12 +202,10 @@ export default function BubbleButton({
       depthTest: true
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    // Kemiringan sinematik khas cincin planet (~68 derajat)
     ringMesh.rotation.x = Math.PI * 0.38;
     ringMesh.rotation.y = Math.PI * 0.06;
     planetGroup.add(ringMesh);
 
-    // 6. Pencahayaan Studio
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
@@ -242,7 +225,6 @@ export default function BubbleButton({
     bottomLight.position.set(0, -2.5, 1.2);
     scene.add(bottomLight);
 
-    // 7. Deteksi Kursor & Rotasi 3D
     let targetRotX = 0;
     let targetRotY = 0;
     let targetShiftX = 0;
@@ -261,21 +243,19 @@ export default function BubbleButton({
       const factor = Math.max(0, 1.0 - dist / maxDistance);
       setProximity(factor);
 
-      // Rotasi 3D tenang dan proporsional
-      const maxRotAngle = 0.28; // ~16 derajat (anggun & mencegah cincin terpotong di batas atas)
+      const maxRotAngle = 0.28;
       targetRotY = (dx / (maxDistance * 0.85)) * maxRotAngle;
-      targetRotX = (dy / (maxDistance * 0.85)) * maxRotAngle; // Inverted atas-bawah
+      targetRotX = (dy / (maxDistance * 0.85)) * maxRotAngle;
 
       targetRotY = Math.max(-maxRotAngle, Math.min(maxRotAngle, targetRotY));
       targetRotX = Math.max(-maxRotAngle, Math.min(maxRotAngle, targetRotX));
 
       targetShiftX = (dx / maxDistance) * 0.025;
-      targetShiftY = (dy / maxDistance) * 0.015; // Pergeseran vertikal halus agar cincin tetap berada di dalam viewport
+      targetShiftY = (dy / maxDistance) * 0.015;
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
 
-    // 8. Render Loop
     let animationFrameId;
     let clock = new THREE.Clock();
 
@@ -283,7 +263,6 @@ export default function BubbleButton({
       animationFrameId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      // Efek getaran cair gelembung yang sangat lembut & tenang
       const wobbleAmp = 0.005 + (targetRotX * targetRotX + targetRotY * targetRotY) * 0.004;
       const positions = posAttr.array;
       for (let i = 0; i < positions.length; i += 3) {
@@ -298,17 +277,13 @@ export default function BubbleButton({
       posAttr.needsUpdate = true;
       bubbleGeo.computeVertexNormals();
 
-      // Gerakan mengapung alami yang sangat lambat (meditatif)
       const floatY = Math.sin(time * 0.85) * 0.024;
 
-      // Rotasi 3D menoleh mengikuti kursor untuk seluruh planet (gelembung + cincin)
       planetGroup.rotation.x += (targetRotX - planetGroup.rotation.x) * 0.015;
       planetGroup.rotation.y += (targetRotY - planetGroup.rotation.y) * 0.015;
 
-      // Putaran independen sangat lambat pada debu cincin planet
       ringMesh.rotation.z += 0.0012;
 
-      // Posisi parallax melayang lembut
       planetGroup.position.x += (targetShiftX - planetGroup.position.x) * 0.015;
       planetGroup.position.y += (floatY + targetShiftY - planetGroup.position.y) * 0.015;
 
@@ -316,7 +291,6 @@ export default function BubbleButton({
     };
     animate();
 
-    // 9. Cleanup
     return () => {
       resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
@@ -347,7 +321,6 @@ export default function BubbleButton({
         aria-label="Explore Journey"
         className="group relative w-full flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e5ad68] cursor-pointer disabled:cursor-default"
       >
-        {/* Pendaran Cahaya Emas Luas di Belakang Komposisi */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] xs:w-[420px] sm:w-[640px] md:w-[780px] lg:w-[940px] xl:w-[1080px] h-[260px] xs:h-[320px] sm:h-[380px] md:h-[440px] lg:h-[500px] rounded-full bg-radial from-[#e5ad68]/35 via-[#d97706]/15 to-transparent blur-3xl transition-all duration-500 pointer-events-none -z-10"
           style={{
@@ -356,7 +329,6 @@ export default function BubbleButton({
           }}
         />
 
-        {/* Pulsing Ripple Rings saat tombol diaktifkan */}
         {isActivating && (
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[380px] sm:h-[380px] lg:w-[480px] lg:h-[480px] rounded-full border-2 border-[#e5ad68] pointer-events-none"
@@ -366,9 +338,7 @@ export default function BubbleButton({
           />
         )}
 
-        {/* 1. TAMPILAN MOBILE (< md): Komposisi Vertikal Responsif dengan Gambar 2D Planet */}
         <div className="flex md:hidden flex-col items-center justify-center w-full px-3 text-center my-auto">
-          {/* Teks Atas: EXPLORE */}
           <motion.span
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -378,16 +348,13 @@ export default function BubbleButton({
             EXPLORE
           </motion.span>
 
-          {/* Centerpiece Gambar 2D Planet dengan Cincin Kosmik Keemasan */}
           <motion.div
             animate={{ y: [-4, 4, -4] }}
             transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
             className="relative my-2 xs:my-3 w-44 h-44 xs:w-52 xs:h-52 sm:w-60 sm:h-60 flex items-center justify-center select-none"
           >
-            {/* Pendaran Cahaya Planet Atmosferik */}
             <div className="absolute inset-0 rounded-full bg-radial from-[#e5ad68]/45 via-[#d97706]/20 to-transparent blur-2xl pointer-events-none scale-105" />
 
-            {/* Cincin Saturnus Kosmik Keemasan (2D Vector Styling) */}
             <div
               className="absolute inset-x-[-18%] top-[34%] h-[32%] rounded-[50%] border-2 border-[#e5ad68]/80 pointer-events-none -rotate-[16deg]"
               style={{
@@ -398,7 +365,6 @@ export default function BubbleButton({
               className="absolute inset-x-[-26%] top-[30%] h-[40%] rounded-[50%] border border-[#e5ad68]/35 pointer-events-none -rotate-[16deg]"
             />
 
-            {/* Gambar Bulat Planet (2D Image Sesuai Request User) */}
             <div className="relative z-10 w-32 h-32 xs:w-36 xs:h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden border-2 border-[#e5ad68]/85 shadow-[0_0_35px_rgba(229,173,104,0.5),0_12px_28px_rgba(0,0,0,0.65)] bg-[#0d1017]">
               <img
                 src={imageSrc}
@@ -406,14 +372,11 @@ export default function BubbleButton({
                 className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.98]"
                 loading="eager"
               />
-              {/* Kilauan Kaca Melengkung (Specular Reflection) */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/[0.08] to-white/35 pointer-events-none" />
-              {/* Kedalaman Bayangan Sferis Interior */}
               <div className="absolute inset-0 rounded-full shadow-[inset_0_0_20px_rgba(0,0,0,0.7)] pointer-events-none" />
             </div>
           </motion.div>
 
-          {/* Teks Bawah: JOURNEY */}
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -423,7 +386,6 @@ export default function BubbleButton({
             JOURNEY
           </motion.span>
 
-          {/* Tombol Akselerasi Interaktif untuk Pengguna Layar Sentuh */}
           <div className="mt-3 xs:mt-4 flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm border border-[#e5ad68]/40 shadow-lg active:scale-95 transition-transform">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#e5ad68]">
               {isActivating ? 'Entering Journey...' : 'Tap to Launch'}
@@ -434,9 +396,7 @@ export default function BubbleButton({
           </div>
         </div>
 
-        {/* 2. TAMPILAN DESKTOP (md:flex): Horizontal EXPLORE [3D CANVAS] JOURNEY */}
         <div className="hidden md:flex items-center justify-center w-full max-w-full">
-          {/* SISI KIRI: EXPLORE (1 Baris) */}
           <motion.div
             animate={{
               x: isHovered ? -12 : 0,
@@ -450,7 +410,6 @@ export default function BubbleButton({
             </span>
           </motion.div>
 
-          {/* TENGAH: 3D Canvas Container (Proporsional & Seimbang) */}
           <motion.div
             animate={{
               scale: isHovered ? 1.05 : 1,
@@ -464,7 +423,6 @@ export default function BubbleButton({
             />
           </motion.div>
 
-          {/* SISI KANAN: JOURNEY (1 Baris) */}
           <motion.div
             animate={{
               x: isHovered ? 12 : 0,
@@ -479,7 +437,6 @@ export default function BubbleButton({
           </motion.div>
         </div>
 
-        {/* Indikator status mikro interaktif di bawah (Desktop Only) */}
         <div className="hidden md:flex absolute -bottom-8 sm:-bottom-10 left-1/2 -translate-x-1/2 items-center gap-2 pointer-events-none">
           <span
             className={`text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase transition-all duration-300 ${

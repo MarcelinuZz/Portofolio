@@ -122,3 +122,141 @@
   }
 }
 
+/* -------------------------------------------------------------
+ * Journey Section - Fading Black Box Background & Border
+ * Solid dark & crisp behind the text, smoothly fades to transparent after text
+ * ------------------------------------------------------------- */
+.journey-fading-card-bg {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 13, 20, 0.96) 0%,
+    rgba(10, 13, 20, 0.90) 40%,
+    rgba(10, 13, 20, 0.40) 50%,
+    transparent 58%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 40%,
+    rgba(0, 0, 0, 0.40) 50%,
+    transparent 58%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 40%,
+    rgba(0, 0, 0, 0.40) 50%,
+    transparent 58%
+  );
+}
+
+@media (min-width: 1024px) {
+  .journey-fading-card-bg {
+    background: linear-gradient(
+      90deg,
+      rgba(10, 13, 20, 0.96) 0%,
+      rgba(10, 13, 20, 0.92) 32%,
+      rgba(10, 13, 20, 0.45) 42%,
+      transparent 50%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      black 0%,
+      black 32%,
+      rgba(0, 0, 0, 0.45) 42%,
+      transparent 50%
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      black 0%,
+      black 32%,
+      rgba(0, 0, 0, 0.45) 42%,
+      transparent 50%
+    );
+  }
+}
+
+.journey-fading-card-border {
+  mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 36%,
+    rgba(0, 0, 0, 0.3) 46%,
+    transparent 54%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 36%,
+    rgba(0, 0, 0, 0.3) 46%,
+    transparent 54%
+  );
+}
+
+@media (min-width: 1024px) {
+  .journey-fading-card-border {
+    mask-image: linear-gradient(
+      90deg,
+      black 0%,
+      black 28%,
+      rgba(0, 0, 0, 0.3) 38%,
+      transparent 46%
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      black 0%,
+      black 28%,
+      rgba(0, 0, 0, 0.3) 38%,
+      transparent 46%
+    );
+  }
+}
+
+/* Celestial Cartography Background Animations */
+@keyframes celestialDrift {
+  0% {
+    transform: scale(1.03) translate(0%, 0%) rotate(0deg);
+  }
+  33% {
+    transform: scale(1.06) translate(-1.2%, 0.8%) rotate(0.3deg);
+  }
+  66% {
+    transform: scale(1.05) translate(1.0%, -0.9%) rotate(-0.25deg);
+  }
+  100% {
+    transform: scale(1.03) translate(0%, 0%) rotate(0deg);
+  }
+}
+
+.animate-celestial-drift {
+  animation: celestialDrift 28s ease-in-out infinite alternate;
+}
+
+@keyframes lanternBreathe {
+  0% {
+    opacity: 0.35;
+    transform: scale(1.0);
+  }
+  25% {
+    opacity: 0.48;
+    transform: scale(1.02) translate(0.8%, -0.5%);
+  }
+  50% {
+    opacity: 0.38;
+    transform: scale(0.99) translate(-0.6%, 0.4%);
+  }
+  75% {
+    opacity: 0.52;
+    transform: scale(1.03) translate(0.4%, 0.7%);
+  }
+  100% {
+    opacity: 0.35;
+    transform: scale(1.0);
+  }
+}
+
+.animate-lantern-breathe {
+  animation: lanternBreathe 12s ease-in-out infinite;
+}
+
+

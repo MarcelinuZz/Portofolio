@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function PortalTransition({ isActive, onComplete }) {
   useEffect(() => {
     if (isActive) {
-      // 1.35s: Rich, cinematic celestial gate activation without being overlong
       const timer = setTimeout(() => {
         if (onComplete) onComplete();
       }, 1350);
@@ -12,7 +11,6 @@ export default function PortalTransition({ isActive, onComplete }) {
     }
   }, [isActive, onComplete]);
 
-  // Pre-generate radial stardust streak particles
   const particles = useMemo(() => {
     return Array.from({ length: 24 }, (_, i) => {
       const angle = (i / 24) * 2 * Math.PI + (i % 2 === 0 ? 0.08 : -0.08);
@@ -38,7 +36,6 @@ export default function PortalTransition({ isActive, onComplete }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.35, ease: 'easeOut' } }}
         >
-          {/* Deep cinematic backdrop dissolve into #14171D (Journey top background tone) */}
           <motion.div
             className="absolute inset-0 bg-[#14171D]"
             initial={{ opacity: 0 }}
@@ -46,7 +43,6 @@ export default function PortalTransition({ isActive, onComplete }) {
             transition={{ duration: 1.35, ease: 'easeInOut' }}
           />
 
-          {/* Cinematic dark edge vignette closing in */}
           <motion.div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -57,7 +53,6 @@ export default function PortalTransition({ isActive, onComplete }) {
             transition={{ duration: 1.35, ease: 'easeOut' }}
           />
 
-          {/* Central soft warm amber glow core (fixed dimensions + scale to prevent reflow) */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none transform-gpu"
             style={{
@@ -77,7 +72,6 @@ export default function PortalTransition({ isActive, onComplete }) {
             }}
           />
 
-          {/* Celestial Astrolabe Ring 1: Clockwise rotating compass ring */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[440px] h-[440px] rounded-full border border-[#e5ad68]/50 flex items-center justify-center pointer-events-none transform-gpu"
             style={{
@@ -95,14 +89,12 @@ export default function PortalTransition({ isActive, onComplete }) {
               ease: [0.16, 1, 0.3, 1]
             }}
           >
-            {/* Cardinal tick accents on the ring */}
             <div className="absolute top-0 w-1.5 h-1.5 rounded-full bg-[#e5ad68]" />
             <div className="absolute bottom-0 w-1.5 h-1.5 rounded-full bg-[#e5ad68]" />
             <div className="absolute left-0 w-1.5 h-1.5 rounded-full bg-[#e5ad68]" />
             <div className="absolute right-0 w-1.5 h-1.5 rounded-full bg-[#e5ad68]" />
           </motion.div>
 
-          {/* Celestial Astrolabe Ring 2: Counter-clockwise dashed ring */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full border border-dashed border-[#e5ad68]/35 pointer-events-none transform-gpu"
             style={{
@@ -121,7 +113,6 @@ export default function PortalTransition({ isActive, onComplete }) {
             }}
           />
 
-          {/* Radiating Stardust Warp Particles */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {particles.map((p) => (
               <motion.div

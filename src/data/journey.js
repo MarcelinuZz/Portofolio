@@ -1,7 +1,3 @@
-/**
- * Centralized Journey Experience Data (Section 2)
- * Horizontal storytelling journey across BINUS University
- */
 export const journeyExperiences = [
   {
     id: 'binus-it-division',
@@ -22,7 +18,18 @@ export const journeyExperiences = [
     ],
     growthStage: 'Hardskill',
     accentColor: 'amber',
-    image: '/images/journey/it-division.webp'
+    image: '/images/journey/it-division.webp',
+    planet: {
+      name: 'Mercury',
+      symbol: '☿',
+      classification: 'Terrestrial Planet',
+      theme: 'Resilience & Technical Ignition',
+      accent: '#e5ad68',
+      glow: 'rgba(229, 173, 104, 0.45)',
+      orbitalSpeed: '47.4 km/s',
+      radius: 0.88,
+      rotationSpeed: 0.14
+    }
   },
   {
     id: 'lab-assistant',
@@ -41,7 +48,18 @@ export const journeyExperiences = [
     ],
     growthStage: 'Communication, Teaching & Leadership',
     accentColor: 'indigo',
-    image: '/images/journey/lab-assistant.webp'
+    image: '/images/journey/lab-assistant.webp',
+    planet: {
+      name: 'Venus',
+      symbol: '♀',
+      classification: 'Atmospheric Planet',
+      theme: 'Communication & Radiant Mentorship',
+      accent: '#fbbf24',
+      glow: 'rgba(251, 191, 36, 0.45)',
+      orbitalSpeed: '35.0 km/s',
+      radius: 1.15,
+      rotationSpeed: 0.11
+    }
   },
   {
     id: 'competitions',
@@ -60,6 +78,17 @@ export const journeyExperiences = [
     ],
     growthStage: 'Resilience, Team Synergy & Exploration',
     accentColor: 'amber',
-    image: '/images/journey/competition.webp'
+    image: '/images/journey/competition.webp',
+    planet: {
+      name: 'Earth',
+      symbol: '♁',
+      classification: 'Living Biosphere',
+      theme: 'Synergy & Continuous Discovery',
+      accent: '#38bdf8',
+      glow: 'rgba(56, 189, 248, 0.45)',
+      orbitalSpeed: '29.8 km/s',
+      radius: 1.22,
+      rotationSpeed: 0.18
+    }
   }
 ];

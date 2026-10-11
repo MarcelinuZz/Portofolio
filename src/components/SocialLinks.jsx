@@ -34,7 +34,6 @@ export default function SocialLinks({ className = '', variant = 'minimal' }) {
     );
   }
 
-  // Minimal inline list for subtle display
   return (
     <nav aria-label="Social connections" className={`flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2.5 ${className}`}>
       {socialLinks.map((item) => {

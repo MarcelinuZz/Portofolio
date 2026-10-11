@@ -1,7 +1,3 @@
-/**
- * Centralized Social & Contact Links
- * Easily replace these URLs with your real profiles.
- */
 export const socialLinks = [
   {
     name: 'LinkedIn',

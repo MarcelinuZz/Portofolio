@@ -5,7 +5,6 @@ import { GithubIcon } from './Icons';
 import { getProjectGithubLinks, getProjectOtherSourceLinks } from '../data/projects';
 
 export default function ProjectModal({ project, onClose }) {
-  // ESC key listener to close modal (R-32)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -27,9 +26,7 @@ export default function ProjectModal({ project, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-10 overflow-y-auto">
-        
-        {/* Backdrop (Dose cap: blur on modal backdrop only) */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 lg:p-10 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -38,22 +35,20 @@ export default function ProjectModal({ project, onClose }) {
           className="fixed inset-0 bg-[#0a0c10]/80 backdrop-blur-sm"
         />
 
-        {/* Modal Window Container */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.98, y: 15 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-3xl bg-[#12151e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 my-auto max-h-[90vh] flex flex-col"
+          className="relative w-full max-w-3xl bg-[#12151e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 my-auto max-h-[90dvh] flex flex-col"
         >
-          {/* Top modal header bar */}
-          <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-white/10 bg-[#161a24] sticky top-0 z-20">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#e5ad68]">
+          <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-5 border-b border-white/10 bg-[#161a24] sticky top-0 z-20">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#e5ad68]">
                 {project.category}
               </span>
               <span className="text-white/20">•</span>
-              <span className="font-mono text-xs text-slate-400">
+              <span className="font-mono text-[11px] sm:text-xs text-slate-400">
                 {project.year}
               </span>
             </div>
@@ -62,16 +57,13 @@ export default function ProjectModal({ project, onClose }) {
               type="button"
               onClick={onClose}
               aria-label="Close project modal"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Modal Content Scroll Area */}
-          <div className="overflow-y-auto p-6 sm:p-8 space-y-7">
-            
-            {/* Title & Short Description */}
+          <div className="overflow-y-auto p-4 sm:p-8 space-y-5 sm:space-y-7">
             <div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
                 {project.title}
@@ -81,7 +73,6 @@ export default function ProjectModal({ project, onClose }) {
               </p>
             </div>
 
-            {/* Project Image */}
             <div className="relative rounded-xl overflow-hidden border border-white/10 bg-[#0a0c10] aspect-[16/9]">
               <img
                 src={project.image}
@@ -90,7 +81,6 @@ export default function ProjectModal({ project, onClose }) {
               />
             </div>
 
-            {/* Overview */}
             <div className="space-y-2">
               <h3 className="text-xs uppercase tracking-wider font-semibold text-[#e5ad68]">
                 Project Overview
@@ -100,7 +90,6 @@ export default function ProjectModal({ project, onClose }) {
               </p>
             </div>
 
-            {/* Contribution */}
             {project.myContribution && (
               <div className="space-y-2">
                 <h3 className="text-xs uppercase tracking-wider font-semibold text-[#e5ad68]">
@@ -112,7 +101,6 @@ export default function ProjectModal({ project, onClose }) {
               </div>
             )}
 
-            {/* What I Learned */}
             {project.keyLearning && (
               <div className="space-y-2">
                 <h3 className="text-xs uppercase tracking-wider font-semibold text-[#e5ad68]">
@@ -124,7 +112,6 @@ export default function ProjectModal({ project, onClose }) {
               </div>
             )}
 
-            {/* Technologies */}
             <div className="space-y-2">
               <h3 className="text-xs uppercase tracking-wider font-semibold text-slate-400">
                 Technology Stack
@@ -141,15 +128,14 @@ export default function ProjectModal({ project, onClose }) {
               </div>
             </div>
 
-            {/* Action Links */}
-            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/10">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-4 border-t border-white/10">
               {githubLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white text-xs font-medium transition-all w-full sm:w-auto"
                 >
                   <GithubIcon className="w-4 h-4" />
                   <span>{link.label === 'GitHub' || link.label === 'Source' ? 'View Repository' : `${link.label} Repo`}</span>
@@ -162,7 +148,7 @@ export default function ProjectModal({ project, onClose }) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white text-xs font-medium transition-all w-full sm:w-auto"
                 >
                   <Code2 className="w-4 h-4" />
                   <span>{link.label === 'Source' ? 'View Source' : link.label}</span>
@@ -174,14 +160,13 @@ export default function ProjectModal({ project, onClose }) {
                   href={project.liveDemo}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5ad68] text-[#0a0c10] text-xs font-bold hover:bg-[#f3c68f] transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#e5ad68] text-[#0a0c10] text-xs font-bold hover:bg-[#f3c68f] active:scale-95 transition-all w-full sm:w-auto shadow-md"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Launch Live Demo</span>
                 </a>
               )}
             </div>
-
           </div>
         </motion.div>
       </div>

@@ -29,8 +29,6 @@ export default function Footer() {
   return (
     <footer className="relative w-full border-t border-white/[0.06] bg-[#080A0D]/70 backdrop-blur-sm py-10 px-6 sm:px-12 lg:px-20 text-slate-400">
       <div className="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-        
-        {/* Left: Branding & Tagline */}
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left text-xs">
           <span className="font-bold text-white tracking-wide">
             MARCELINUS
@@ -41,14 +39,12 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* Center: Live Local Clock (Jakarta GMT+7) */}
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
           <span className="w-1.5 h-1.5 rounded-full bg-[#e5ad68]" />
           <span>Jakarta (GMT+7):</span>
           <span className="text-slate-200">{time || '19:30:00'}</span>
         </div>
 
-        {/* Right: Back to top button */}
         <button
           type="button"
           onClick={scrollToTop}
@@ -58,7 +54,6 @@ export default function Footer() {
           <span>Top</span>
           <ArrowUp className="w-3.5 h-3.5" />
         </button>
-
       </div>
     </footer>
   );

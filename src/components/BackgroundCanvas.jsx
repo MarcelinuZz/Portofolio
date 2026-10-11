@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useParallax } from '../hooks/useParallax';
 
-/**
- * Subtle atmospheric background
- * Minimal particle dust responding gently to cursor parallax without aggressive colored blobs
- */
 export default function BackgroundCanvas() {
   const canvasRef = useRef(null);
   const parallax = useParallax(20);
@@ -25,7 +21,6 @@ export default function BackgroundCanvas() {
     };
     window.addEventListener('resize', handleResize);
 
-    // Subtle atmospheric dust particles
     const particleCount = Math.min(Math.floor((width * height) / 28000), 45);
     const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * width,

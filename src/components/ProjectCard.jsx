@@ -22,7 +22,6 @@ export default function ProjectCard({ project, onSelect }) {
       className="group relative cursor-pointer flex flex-col justify-between rounded-xl bg-[#12151e] hover:bg-[#161a24] border border-white/10 hover:border-white/20 p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl overflow-hidden"
     >
       <div>
-        {/* Top metadata */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <span className="text-xs font-medium uppercase tracking-wider text-[#e5ad68]">
             {category}
@@ -32,7 +31,6 @@ export default function ProjectCard({ project, onSelect }) {
           </span>
         </div>
 
-        {/* Project Image */}
         <div className="relative rounded-lg overflow-hidden border border-white/10 bg-[#0a0c10] aspect-[16/10] mb-5">
           <img
             src={image}
@@ -42,7 +40,6 @@ export default function ProjectCard({ project, onSelect }) {
           />
         </div>
 
-        {/* Title & Short Description */}
         <div className="space-y-2 mb-5">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-[#e5ad68] transition-colors">
@@ -56,7 +53,6 @@ export default function ProjectCard({ project, onSelect }) {
         </div>
       </div>
 
-      {/* Tech Stack & Links */}
       <div className="space-y-4 pt-3 border-t border-white/10">
         <div className="flex flex-wrap gap-1.5">
           {technologies.map((tech) => (
@@ -69,7 +65,6 @@ export default function ProjectCard({ project, onSelect }) {
           ))}
         </div>
 
-        {/* Action Link Buttons */}
         <div className="flex flex-wrap items-center gap-2.5 pt-1">
           {githubLinks.map((link) => (
             <a

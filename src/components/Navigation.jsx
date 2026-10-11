@@ -40,7 +40,6 @@ export default function Navigation({ activeSection = 'hero', onNavigate }) {
             : 'bg-[#0f121a]/60 backdrop-blur-sm border border-white/[0.06]'
         }`}
       >
-        {/* Brand name */}
         <a
           href="#hero"
           onClick={(e) => handleClick(e, 'hero')}
@@ -52,7 +51,6 @@ export default function Navigation({ activeSection = 'hero', onNavigate }) {
 
         <div className="h-3.5 w-px bg-white/10 mx-1" />
 
-        {/* Section Links */}
         <ul className="flex items-center gap-1 list-none m-0 p-0">
           {navItems.map((item) => {
             const isActive = activeSection === item.id;

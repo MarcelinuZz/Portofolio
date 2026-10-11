@@ -1,6 +1,3 @@
-/**
- * Centralized Profile and Hero Data
- */
 export const profileData = {
   name: 'Marcelinus',
   badge: 'MARCE(LINUS) / PERSONAL PORTFOLIO',
