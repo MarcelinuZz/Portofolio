@@ -109,10 +109,7 @@ export default function JourneyPlanetOrbitCanvas({
   const stateRef = useRef({
     activeStep: 0,
     currentProgress: 0,
-    mouse: { x: 0, y: 0, targetX: 0, targetY: 0 },
-    isDragging: false,
-    dragStartY: 0,
-    dragDeltaY: 0
+    mouse: { x: 0, y: 0, targetX: 0, targetY: 0 }
   });
 
   useEffect(() => {
@@ -324,34 +321,7 @@ export default function JourneyPlanetOrbitCanvas({
       stateRef.current.mouse.targetY = ny * 0.35;
     };
 
-    const handlePointerDown = (e) => {
-      stateRef.current.isDragging = true;
-      stateRef.current.dragStartY = e.clientY;
-      stateRef.current.dragDeltaY = 0;
-    };
-
-    const handlePointerUp = () => {
-      if (!stateRef.current.isDragging) return;
-      stateRef.current.isDragging = false;
-      const dy = stateRef.current.dragDeltaY;
-
-      if (dy > 45 && stateRef.current.activeStep < 2) {
-        setActiveStep?.((prev) => Math.min(prev + 1, 2));
-      } else if (dy < -45 && stateRef.current.activeStep > 0) {
-        setActiveStep?.((prev) => Math.max(prev - 1, 0));
-      }
-    };
-
-    const handleGlobalPointerMove = (e) => {
-      if (stateRef.current.isDragging) {
-        stateRef.current.dragDeltaY = stateRef.current.dragStartY - e.clientY;
-      }
-    };
-
     container.addEventListener('pointermove', handlePointerMove);
-    container.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointermove', handleGlobalPointerMove);
 
     let animationFrameId;
     const clock = new THREE.Clock();
@@ -405,9 +375,6 @@ export default function JourneyPlanetOrbitCanvas({
       resizeObserver.disconnect();
 
       container.removeEventListener('pointermove', handlePointerMove);
-      container.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointermove', handleGlobalPointerMove);
 
       sharedOrbitGroup.traverse((child) => {
         if (child.geometry) child.geometry.dispose();
@@ -429,7 +396,7 @@ export default function JourneyPlanetOrbitCanvas({
     <div className={`relative w-full h-full flex items-center justify-center select-none ${className}`}>
       <div
         ref={mountRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing touch-none flex items-center justify-center relative z-10"
+        className="w-full h-full touch-pan-y flex items-center justify-center relative z-10"
         aria-label="3D Interactive Planetary Orbit Canvas"
       />
     </div>

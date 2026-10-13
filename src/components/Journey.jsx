@@ -13,7 +13,9 @@ export default function Journey({
   onOpenProjects
 }) {
   const sectionRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
   const [internalActiveStep, setInternalActiveStep] = useState(0);
   const [slideDirection, setSlideDirection] = useState('next');
 
@@ -22,6 +24,7 @@ export default function Journey({
 
   const isLockedRef = useRef(false);
   const activeStepRef = useRef(0);
+  const isTransitioningRef = useRef(false);
 
   useEffect(() => {
     activeStepRef.current = activeStep;
@@ -29,6 +32,43 @@ export default function Journey({
 
   const totalPanels = journeyExperiences.length;
   const currentExp = journeyExperiences[activeStep] || journeyExperiences[0];
+
+  const goToNextStep = useCallback(() => {
+    if (isTransitioningRef.current) return;
+    if (activeStepRef.current < totalPanels - 1) {
+      isTransitioningRef.current = true;
+      setSlideDirection('next');
+      setActiveStep((prev) => Math.min(prev + 1, totalPanels - 1));
+      setTimeout(() => {
+        isTransitioningRef.current = false;
+      }, 350);
+    }
+  }, [totalPanels, setActiveStep]);
+
+  const goToPrevStep = useCallback(() => {
+    if (isTransitioningRef.current) return;
+    if (activeStepRef.current > 0) {
+      isTransitioningRef.current = true;
+      setSlideDirection('prev');
+      setActiveStep((prev) => Math.max(prev - 1, 0));
+      setTimeout(() => {
+        isTransitioningRef.current = false;
+      }, 350);
+    }
+  }, [setActiveStep]);
+
+  const goToStep = useCallback(
+    (index) => {
+      if (isTransitioningRef.current || index === activeStepRef.current) return;
+      isTransitioningRef.current = true;
+      setSlideDirection(index > activeStepRef.current ? 'next' : 'prev');
+      setActiveStep(index);
+      setTimeout(() => {
+        isTransitioningRef.current = false;
+      }, 350);
+    },
+    [setActiveStep]
+  );
 
   useEffect(() => {
     const checkMobile = () => {
@@ -157,7 +197,7 @@ export default function Journey({
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         if (activeStep < totalPanels - 1) {
           e.preventDefault();
-          setActiveStep((prev) => prev + 1);
+          goToNextStep();
         } else if (activeStep === totalPanels - 1) {
           e.preventDefault();
           scrollToProjects();
@@ -165,43 +205,47 @@ export default function Journey({
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         if (activeStep > 0) {
           e.preventDefault();
-          setActiveStep((prev) => prev - 1);
+          goToPrevStep();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeStep, totalPanels, isProjectsActive, scrollToProjects, setActiveStep]);
+  }, [activeStep, totalPanels, isProjectsActive, scrollToProjects, goToNextStep, goToPrevStep]);
 
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
+  const canvasTouchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const cardDragStartRef = useRef(0);
 
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+  const handleCanvasTouchStart = (e) => {
+    if (e.touches.length !== 1) return;
+    canvasTouchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now()
+    };
   };
 
-  const handleTouchEnd = (e) => {
-    const deltaX = touchStartX.current - e.changedTouches[0].clientX;
-    const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+  const handleCanvasTouchEnd = (e) => {
+    if (!canvasTouchStartRef.current.time) return;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
 
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 35) {
-      if (deltaX > 0 && activeStep < totalPanels - 1) {
-        setSlideDirection('next');
-        setActiveStep((prev) => Math.min(prev + 1, totalPanels - 1));
-      } else if (deltaX < 0 && activeStep > 0) {
-        setSlideDirection('prev');
-        setActiveStep((prev) => Math.max(prev - 1, 0));
-      }
-    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
-      if (deltaY > 0 && activeStep < totalPanels - 1) {
-        setSlideDirection('next');
-        setActiveStep((prev) => Math.min(prev + 1, totalPanels - 1));
-      } else if (deltaY < 0 && activeStep > 0) {
-        setSlideDirection('prev');
-        setActiveStep((prev) => Math.max(prev - 1, 0));
-      }
+    const deltaX = canvasTouchStartRef.current.x - touch.clientX;
+    const deltaY = canvasTouchStartRef.current.y - touch.clientY;
+    const duration = Date.now() - canvasTouchStartRef.current.time;
+    canvasTouchStartRef.current.time = 0;
+
+    if (duration >= 450) return;
+
+    if (Math.abs(deltaX) <= Math.abs(deltaY) * 1.8) return;
+
+    if (Math.abs(deltaX) < 65) return;
+
+    if (deltaX > 0) {
+      goToNextStep();
+    } else {
+      goToPrevStep();
     }
   };
 
@@ -209,8 +253,6 @@ export default function Journey({
     <section
       id="journey"
       ref={sectionRef}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       className="relative w-full bg-transparent overflow-hidden"
     >
       <JourneyGridBackground />
@@ -270,7 +312,11 @@ export default function Journey({
             </h2>
           </div>
 
-          <div className="w-full h-[300px] sm:h-[340px] rounded-2xl bg-[#0d1017]/90 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.7)] overflow-hidden relative">
+          <div
+            onTouchStart={handleCanvasTouchStart}
+            onTouchEnd={handleCanvasTouchEnd}
+            className="w-full h-[300px] sm:h-[340px] rounded-2xl bg-[#0d1017]/90 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.7)] overflow-hidden relative touch-pan-y"
+          >
             <JourneyPlanetOrbitCanvas
               activeStep={activeStep}
               setActiveStep={setActiveStep}
@@ -288,18 +334,33 @@ export default function Journey({
                 exit={{ opacity: 0, x: slideDirection === 'next' ? -45 : 45 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 drag="x"
+                dragDirectionLock
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.22}
+                dragElastic={0.2}
+                dragMomentum={false}
+                onDragStart={() => {
+                  cardDragStartRef.current = Date.now();
+                }}
                 onDragEnd={(e, { offset, velocity }) => {
-                  if (offset.x < -35 || velocity.x < -250) {
-                    if (activeStep < totalPanels - 1) {
-                      setSlideDirection('next');
-                      setActiveStep((prev) => Math.min(prev + 1, totalPanels - 1));
+                  const duration = Date.now() - (cardDragStartRef.current || 0);
+                  const isLongHold = duration > 450;
+
+                  if (isLongHold) {
+                    // Finger held down: ignore velocity noise and only slide on large deliberate drag
+                    if (offset.x < -90) {
+                      goToNextStep();
+                    } else if (offset.x > 90) {
+                      goToPrevStep();
                     }
-                  } else if (offset.x > 35 || velocity.x > 250) {
-                    if (activeStep > 0) {
-                      setSlideDirection('prev');
-                      setActiveStep((prev) => Math.max(prev - 1, 0));
+                  } else {
+                    // Intentional flick or swipe (duration <= 450ms)
+                    const isSwipeNext = offset.x < -65 || (offset.x < -30 && velocity.x < -450);
+                    const isSwipePrev = offset.x > 65 || (offset.x > 30 && velocity.x > 450);
+
+                    if (isSwipeNext) {
+                      goToNextStep();
+                    } else if (isSwipePrev) {
+                      goToPrevStep();
                     }
                   }
                 }}
@@ -314,10 +375,7 @@ export default function Journey({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-[#0c1017]/90 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
               <button
                 type="button"
-                onClick={() => {
-                  setSlideDirection('prev');
-                  setActiveStep((prev) => Math.max(prev - 1, 0));
-                }}
+                onClick={goToPrevStep}
                 disabled={activeStep === 0}
                 className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 border select-none ${
                   activeStep === 0
@@ -339,10 +397,7 @@ export default function Journey({
                     <button
                       key={i}
                       type="button"
-                      onClick={() => {
-                        setSlideDirection(i > activeStep ? 'next' : 'prev');
-                        setActiveStep(i);
-                      }}
+                      onClick={() => goToStep(i)}
                       className={`h-2 rounded-full transition-all duration-300 ${
                         activeStep === i
                           ? 'w-7 bg-[#e5ad68] shadow-[0_0_8px_rgba(229,173,104,0.6)]'
@@ -356,10 +411,7 @@ export default function Journey({
 
               <button
                 type="button"
-                onClick={() => {
-                  setSlideDirection('next');
-                  setActiveStep((prev) => Math.min(prev + 1, totalPanels - 1));
-                }}
+                onClick={goToNextStep}
                 disabled={activeStep === totalPanels - 1}
                 className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 border select-none ${
                   activeStep === totalPanels - 1
